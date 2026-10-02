@@ -234,10 +234,12 @@ async function sendMessage() {
       }));
       
       const cleanGeminiKey = geminiKey.replace(/[^\x20-\x7E]/g, '');
-      const fallbackModels = ['gemini-3.8-flash', 'gemini-3.8-pro', 'gemini-1.5-pro-latest', 'gemini-pro'];
+      // Оставляем только актуальные модели 2026 года
+      const fallbackModels = ['gemini-3.8-flash', 'gemini-3.8-pro', 'gemini-3.8-flash-lite'];
       
       let success = false;
       let lastErr = null;
+      let isOverloaded = false;
       
       for (const modelId of fallbackModels) {
         if (success) break;
@@ -264,13 +266,22 @@ async function sendMessage() {
           reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
           if (reply) success = true;
         } catch (err) {
-          console.warn(`[Gemini API] Модель ${modelId} недоступна:`, err.message);
-          lastErr = err;
+          console.warn(`[Gemini API] Модель ${modelId} выдала ошибку:`, err.message);
+          if (err.message.toLowerCase().includes('high demand') || err.message.includes('429')) {
+            isOverloaded = true;
+          }
+          // Сохраняем ошибку, только если это не банальный 404 (чтобы не затирать важные ошибки)
+          if (!err.message.includes('not found')) {
+            lastErr = err;
+          }
         }
       }
       
       if (!success) {
-        throw new Error(lastErr?.message || 'Все модели перегружены. Попробуйте позже.');
+        if (isOverloaded) {
+          throw new Error('Серверы Google сейчас перегружены (High Demand). Пожалуйста, подождите немного и попробуйте снова.');
+        }
+        throw new Error(lastErr?.message || 'Все модели недоступны.');
       }
     }
 
