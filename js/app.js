@@ -233,17 +233,8 @@ async function sendMessage() {
         parts: [{ text: m.content }]
       }));
       
-      // Динамически получаем доступную модель (чтобы избежать ошибки "model not found" в 2026+)
-      const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`);
-      if (!modelsRes.ok) throw new Error('Не удалось получить список моделей Gemini. Проверьте ключ.');
-      const modelsData = await modelsRes.json();
-      
-      // Ищем ЛЮБУЮ модель с поддержкой generateContent, отдавая приоритет тем, что без 'vision'
-      const validModels = modelsData.models?.filter(m => m.supportedGenerationMethods?.includes('generateContent')) || [];
-      const bestModelObj = validModels.find(m => m.name.includes('flash')) || validModels.find(m => m.name.includes('pro')) || validModels[0];
-      
-      const modelId = bestModelObj ? bestModelObj.name.replace('models/', '') : 'gemini-pro'; // Железобетонный Fallback
-      console.log('[Gemini API] Выбрана модель:', modelId);
+      // Согласно подсказке от API Google в 2026 году, актуальная модель — gemini-3.8-flash
+      const modelId = 'gemini-3.8-flash';
       
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${geminiKey}`, {
         method: 'POST',
