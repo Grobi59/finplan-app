@@ -1,152 +1,108 @@
 /**
- * db.js — Async Data Layer
- * Storage: Telegram CloudStorage (primary) → LocalStorage (fallback)
- *
- * Telegram CloudStorage API:
- *   setItem(key, value, callback(err, success))
- *   getItem(key, callback(err, value))
- *   removeItem(key, callback(err, success))
- *   Max: 1024 keys · 128 chars per key · 4096 bytes per value
- *
+ * db.js — Supabase Data Layer
+ * Storage: Supabase PostgreSQL (via REST API)
  * All public methods return Promises.
  */
 
 const DB = (() => {
 
-  // ——— Detect storage provider ———
-  const TG = window.Telegram?.WebApp;
-  const CS = TG?.CloudStorage;
-  const useTelegramCloud = !!CS && (TG.isVersionAtLeast ? TG.isVersionAtLeast('6.9') : false);
-
-  // ——— Keys ———
-  const KEYS = {
-    OBLIGATIONS: 'fp_v2_obligations',
-    INCOMES:     'fp_v2_incomes',
-    EXPENSES:    'fp_v2_expenses',
-    SETTINGS:    'fp_v2_settings',
+  const SUPABASE_URL = 'https://ijmmvogbbibxmlkuwzli.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_Gbj0_wDX22lQvpDIjm1JiQ_K4TcHlLc';
+  
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json'
   };
 
-  // ——— Low-level storage adapter ———
+  // Идентификация пользователя Telegram
+  const TG = window.Telegram?.WebApp;
+  const userId = TG?.initDataUnsafe?.user?.id?.toString() || 'demo_user';
+
+  // Названия колонок в БД Supabase
+  const COLS = {
+    OBLIGATIONS: 'obligations',
+    INCOMES:     'incomes',
+    EXPENSES:    'expenses',
+    SETTINGS:    'settings',
+  };
+
+  let isInitialized = false;
+
   const Storage = {
 
-    get(key) {
-      return new Promise((resolve) => {
-        if (!useTelegramCloud) {
-          return resolve(localStorage.getItem(key));
-        }
-
-        let answered = false;
-        const timer = setTimeout(() => {
-          if (!answered) {
-            answered = true;
-            console.warn(`[DB] CloudStorage get timeout for ${key}, fallback to localStorage`);
-            resolve(localStorage.getItem(key));
-          }
-        }, 5000);
-
-        try {
-          CS.getItem(key, (err, value) => {
-            if (answered) return;
-            answered = true;
-            clearTimeout(timer);
-            if (err) resolve(localStorage.getItem(key)); // fallback on error
-            else resolve(value ? value : null);
-          });
-        } catch (e) {
-          if (!answered) {
-            answered = true;
-            clearTimeout(timer);
-            resolve(localStorage.getItem(key));
-          }
-        }
-      });
+    async _getRow() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/user_data?user_id=eq.${userId}&select=*`, { headers });
+        const data = await res.json();
+        if (data && data.length > 0) return data[0];
+        return null;
+      } catch (err) {
+        console.error('[Supabase] _getRow error:', err);
+        return null;
+      }
     },
 
-    set(key, value) {
-      return new Promise((resolve) => {
-        // Всегда дублируем локально для надежности
-        try { localStorage.setItem(key, value); } catch(e) {}
-
-        if (!useTelegramCloud) return resolve(true);
-
-        let answered = false;
-        const timer = setTimeout(() => {
-          if (!answered) {
-            answered = true;
-            resolve(true); // already saved locally
-          }
-        }, 5000);
-
-        try {
-          CS.setItem(key, value, (err, success) => {
-            if (answered) return;
-            answered = true;
-            clearTimeout(timer);
-            resolve(!err && success);
-          });
-        } catch (e) {
-          if (!answered) {
-            answered = true;
-            clearTimeout(timer);
-            resolve(true);
-          }
-        }
-      });
+    async initUserRow() {
+      if (isInitialized) return;
+      const row = await this._getRow();
+      if (!row) {
+        // Создаем пустую строку для нового пользователя
+        await fetch(`${SUPABASE_URL}/rest/v1/user_data`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            user_id: userId,
+            obligations: [],
+            incomes: [],
+            expenses: [],
+            settings: {}
+          })
+        });
+      }
+      isInitialized = true;
     },
 
-    remove(key) {
-      return new Promise((resolve) => {
-        try { localStorage.removeItem(key); } catch(e) {}
-
-        if (!useTelegramCloud) return resolve();
-
-        let answered = false;
-        const timer = setTimeout(() => {
-          if (!answered) {
-            answered = true;
-            resolve();
-          }
-        }, 5000);
-
-        try {
-          CS.removeItem(key, (err, success) => {
-            if (answered) return;
-            answered = true;
-            clearTimeout(timer);
-            resolve();
-          });
-        } catch (e) {
-          if (!answered) {
-            answered = true;
-            clearTimeout(timer);
-            resolve();
-          }
-        }
-      });
+    async getCol(colName, defaultVal) {
+      await this.initUserRow();
+      const row = await this._getRow();
+      if (!row) return defaultVal;
+      return row[colName] || defaultVal;
     },
+
+    async updateCol(colName, value) {
+      await this.initUserRow();
+      const patch = {};
+      patch[colName] = value;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/user_data?user_id=eq.${userId}`, {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify(patch)
+        });
+        return res.ok;
+      } catch (err) {
+        console.error('[Supabase] updateCol error:', err);
+        return false;
+      }
+    }
   };
 
   // ——— Helpers ———
-  async function loadArray(key) {
-    const raw = await Storage.get(key);
-    if (!raw) return [];
-    try { return JSON.parse(raw) || []; }
-    catch { return []; }
+  async function loadArray(col) {
+    return Storage.getCol(col, []);
   }
 
-  async function saveArray(key, arr) {
-    return Storage.set(key, JSON.stringify(arr));
+  async function saveArray(col, arr) {
+    return Storage.updateCol(col, arr);
   }
 
-  async function loadObj(key) {
-    const raw = await Storage.get(key);
-    if (!raw) return {};
-    try { return JSON.parse(raw) || {}; }
-    catch { return {}; }
+  async function loadObj(col) {
+    return Storage.getCol(col, {});
   }
 
-  async function saveObj(key, obj) {
-    return Storage.set(key, JSON.stringify(obj));
+  async function saveObj(col, obj) {
+    return Storage.updateCol(col, obj);
   }
 
   function genId() {
@@ -157,11 +113,7 @@ const DB = (() => {
   // OBLIGATIONS («Горящие точки»)
   // ========================================================
   const Obligations = {
-
-    async getAll() {
-      return loadArray(KEYS.OBLIGATIONS);
-    },
-
+    async getAll() { return loadArray(COLS.OBLIGATIONS); },
     async add({ title, amount, due_day, criticality }) {
       const items = await this.getAll();
       const item = {
@@ -174,27 +126,24 @@ const DB = (() => {
         created_at:  new Date().toISOString(),
       };
       items.push(item);
-      await saveArray(KEYS.OBLIGATIONS, items);
+      await saveArray(COLS.OBLIGATIONS, items);
       return item;
     },
-
     async togglePaid(id) {
       const items = await this.getAll();
       const idx = items.findIndex(x => x.id === id);
       if (idx === -1) return null;
       items[idx].is_paid = !items[idx].is_paid;
-      await saveArray(KEYS.OBLIGATIONS, items);
+      await saveArray(COLS.OBLIGATIONS, items);
       return items[idx];
     },
-
     async remove(id) {
       const items = (await this.getAll()).filter(x => x.id !== id);
-      return saveArray(KEYS.OBLIGATIONS, items);
+      return saveArray(COLS.OBLIGATIONS, items);
     },
-
     async resetPaidForNewMonth() {
       const items = (await this.getAll()).map(x => ({ ...x, is_paid: false }));
-      return saveArray(KEYS.OBLIGATIONS, items);
+      return saveArray(COLS.OBLIGATIONS, items);
     },
   };
 
@@ -202,11 +151,7 @@ const DB = (() => {
   // INCOMES («Поступления»)
   // ========================================================
   const Incomes = {
-
-    async getAll() {
-      return loadArray(KEYS.INCOMES);
-    },
-
+    async getAll() { return loadArray(COLS.INCOMES); },
     async add({ amount, source }) {
       const items = await this.getAll();
       const item = {
@@ -217,13 +162,12 @@ const DB = (() => {
         type:       'income',
       };
       items.push(item);
-      await saveArray(KEYS.INCOMES, items);
+      await saveArray(COLS.INCOMES, items);
       return item;
     },
-
     async remove(id) {
       const items = (await this.getAll()).filter(x => x.id !== id);
-      return saveArray(KEYS.INCOMES, items);
+      return saveArray(COLS.INCOMES, items);
     },
   };
 
@@ -231,11 +175,7 @@ const DB = (() => {
   // EXPENSES («Расходы»)
   // ========================================================
   const Expenses = {
-
-    async getAll() {
-      return loadArray(KEYS.EXPENSES);
-    },
-
+    async getAll() { return loadArray(COLS.EXPENSES); },
     async add({ amount, description }) {
       const items = await this.getAll();
       const item = {
@@ -246,13 +186,12 @@ const DB = (() => {
         type:        'expense',
       };
       items.push(item);
-      await saveArray(KEYS.EXPENSES, items);
+      await saveArray(COLS.EXPENSES, items);
       return item;
     },
-
     async remove(id) {
       const items = (await this.getAll()).filter(x => x.id !== id);
-      return saveArray(KEYS.EXPENSES, items);
+      return saveArray(COLS.EXPENSES, items);
     },
   };
 
@@ -260,32 +199,24 @@ const DB = (() => {
   // SETTINGS
   // ========================================================
   const Settings = {
-
-    async get() {
-      return loadObj(KEYS.SETTINGS);
-    },
-
+    async get() { return loadObj(COLS.SETTINGS); },
     async set(patch) {
       const current = await this.get();
       const updated = { ...current, ...patch };
-      await saveObj(KEYS.SETTINGS, updated);
+      await saveObj(COLS.SETTINGS, updated);
       return updated;
     },
-
     async getApiKey() {
       const s = await this.get();
       return s.openai_api_key || '';
     },
-
     async setApiKey(key) {
       return this.set({ openai_api_key: key });
     },
-
     async getLastMonth() {
       const s = await this.get();
       return s.last_month || null;
     },
-
     async setLastMonth(ym) {
       return this.set({ last_month: ym });
     },
@@ -297,8 +228,8 @@ const DB = (() => {
     Expenses,
     Settings,
     genId,
-    /** true = Telegram CloudStorage активен, false = LocalStorage fallback */
-    isCloudStorage: useTelegramCloud,
+    // Передаем статус Supabase для отображения в UI
+    isCloudStorage: true, 
   };
 
 })();
