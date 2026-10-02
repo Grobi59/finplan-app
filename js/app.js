@@ -400,8 +400,10 @@ function handleChatKey(event) {
 }
 
 function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  // Сначала сбрасываем высоту, чтобы корректно посчитать scrollHeight при удалении текста
+  el.style.height = '1px';
+  // Устанавливаем новую высоту, ограниченную 120px (плюс 2px на бордеры)
+  el.style.height = Math.min(el.scrollHeight + 2, 120) + 'px';
 }
 
 // ============================================================

@@ -35,7 +35,7 @@
         <div class="header-logo">
           <span class="logo-icon">💎</span>
           <span class="logo-text">ФинПлан</span>
-          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v16</span>
+          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v17</span>
         </div>
         <div class="header-date">
           <span id="header-date-text"></span>
@@ -252,6 +252,10 @@
         <span class="nav-icon">🏠</span>
         <span class="nav-label">Главная</span>
       </button>
+      <button class="nav-item" id="nav-ai" role="tab" aria-selected="false" aria-controls="tab-ai" onclick="switchTab('ai', this)">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-label">Советник</span>
+      </button>
       <button class="nav-item" id="nav-operations" role="tab" aria-selected="false" aria-controls="tab-operations" onclick="switchTab('operations', this)">
         <span class="nav-icon">📊</span>
         <span class="nav-label">Операции</span>
@@ -267,10 +271,6 @@
       <button class="nav-item" id="nav-analytics" role="tab" aria-selected="false" aria-controls="tab-analytics" onclick="switchTab('analytics', this)">
         <span class="nav-icon">📈</span>
         <span class="nav-label">Аналитика</span>
-      </button>
-      <button class="nav-item" id="nav-ai" role="tab" aria-selected="false" aria-controls="tab-ai" onclick="switchTab('ai', this)">
-        <span class="nav-icon">🤖</span>
-        <span class="nav-label">ИИ-Советник</span>
       </button>
     </nav>
 
@@ -421,10 +421,10 @@
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/db.js?v=16"></script>
-  <script src="js/calculator.js?v=16"></script>
-  <script src="js/ui.js?v=16"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/db.js?v=17"></script>
+  <script src="js/calculator.js?v=17"></script>
+  <script src="js/ui.js?v=17"></script>
+  <script src="js/app.js?v=17"></script>
 
 </body>
 </html>
