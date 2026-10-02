@@ -236,11 +236,14 @@ async function sendMessage() {
       // Согласно подсказке от API Google в 2026 году, актуальная модель — gemini-3.8-flash
       const modelId = 'gemini-3.8-flash';
       
+      // Очищаем ключ от случайно скопированных невидимых символов и кириллицы
+      const cleanGeminiKey = geminiKey.replace(/[^\x20-\x7E]/g, '');
+      
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'x-goog-api-key': geminiKey 
+          'x-goog-api-key': cleanGeminiKey 
         },
         body: JSON.stringify({
           systemInstruction: {
