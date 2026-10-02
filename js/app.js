@@ -98,18 +98,34 @@ async function submitObligation(e) {
 // ============================================================
 // API KEY
 // ============================================================
+function toggleApiInputs() {
+  const provider = document.getElementById('ai-provider').value;
+  document.getElementById('group-openai-key').style.display = provider === 'openai' ? 'block' : 'none';
+  document.getElementById('group-gemini-key').style.display = provider === 'gemini' ? 'block' : 'none';
+}
+
 async function saveApiKey(e) {
   e.preventDefault();
-  const key = document.getElementById('api-key-input').value.trim();
-  await DB.Settings.setApiKey(key);
+  const provider = document.getElementById('ai-provider').value;
+  const openAiKey = document.getElementById('api-key-input').value.trim();
+  const geminiKey = document.getElementById('gemini-key-input').value.trim();
+  
+  await DB.Settings.setAiProvider(provider);
+  await DB.Settings.setApiKey(openAiKey);
+  await DB.Settings.setGeminiKey(geminiKey);
+  
   closeModal('modal-api-key');
   updateApiKeyNotice();
-  showToast(key ? '🔑 API-ключ сохранён' : '🔑 API-ключ удалён');
+  showToast('🔑 Настройки ИИ сохранены');
 }
 
 async function updateApiKeyNotice() {
   const notice = document.getElementById('api-key-notice');
-  const hasKey = !!(await DB.Settings.getApiKey());
+  const provider = await DB.Settings.getAiProvider();
+  const openAiKey = await DB.Settings.getApiKey();
+  const geminiKey = await DB.Settings.getGeminiKey();
+  
+  const hasKey = (provider === 'gemini' && geminiKey) || (provider === 'openai' && openAiKey);
   notice.classList.toggle('hidden', hasKey);
 }
 
@@ -164,8 +180,12 @@ async function sendMessage() {
   const text   = input.value.trim();
   if (!text) return;
 
-  const apiKey = await DB.Settings.getApiKey();
-  if (!apiKey) { openModal('modal-api-key'); return; }
+  const provider = await DB.Settings.getAiProvider();
+  const openAiKey = await DB.Settings.getApiKey();
+  const geminiKey = await DB.Settings.getGeminiKey();
+  
+  const hasKey = (provider === 'gemini' && geminiKey) || (provider === 'openai' && openAiKey);
+  if (!hasKey) { openModal('modal-api-key'); return; }
 
   appendMessage('user', text);
   chatHistory.push({ role: 'user', content: text });
@@ -179,31 +199,64 @@ async function sendMessage() {
   try {
     const ctx          = await Calculator.buildAIContext();
     const systemPrompt = buildSystemPrompt(ctx);
+    let reply = 'Нет ответа от ИИ.';
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model:       'gpt-4o-mini',
-        messages:    [
-          { role: 'system', content: systemPrompt },
-          ...chatHistory.slice(-10),
-        ],
-        max_tokens:  600,
-        temperature: 0.7,
-      }),
-    });
+    if (provider === 'openai') {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${openAiKey}`,
+        },
+        body: JSON.stringify({
+          model:       'gpt-4o-mini',
+          messages:    [
+            { role: 'system', content: systemPrompt },
+            ...chatHistory.slice(-10),
+          ],
+          max_tokens:  600,
+          temperature: 0.7,
+        }),
+      });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${response.status}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${response.status}`);
+      }
+
+      const data  = await response.json();
+      reply = data.choices?.[0]?.message?.content?.trim() || 'Нет ответа от ИИ.';
+    }
+    else if (provider === 'gemini') {
+      const geminiHistory = chatHistory.slice(-10).map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+      
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          contents: geminiHistory,
+          generationConfig: {
+            maxOutputTokens: 600,
+            temperature: 0.7,
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Нет ответа от ИИ.';
     }
 
-    const data  = await response.json();
-    const reply = data.choices?.[0]?.message?.content?.trim() || 'Нет ответа от ИИ.';
     chatHistory.push({ role: 'assistant', content: reply });
 
     typingEl.remove();
@@ -326,10 +379,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   await updateApiKeyNotice();
 
   // 7. Подставляем существующий ключ в форму
-  const existingKey = await DB.Settings.getApiKey();
-  if (existingKey) {
-    document.getElementById('api-key-input').value = existingKey;
-  }
+  const provider = await DB.Settings.getAiProvider();
+  const openAiKey = await DB.Settings.getApiKey();
+  const geminiKey = await DB.Settings.getGeminiKey();
+  
+  document.getElementById('ai-provider').value = provider;
+  if (openAiKey) document.getElementById('api-key-input').value = openAiKey;
+  if (geminiKey) document.getElementById('gemini-key-input').value = geminiKey;
+  if (typeof toggleApiInputs === 'function') toggleApiInputs();
 
   // 8. Индикатор хранилища (только в dev-режиме, вне Telegram)
   if (!DB.isCloudStorage) {

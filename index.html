@@ -322,8 +322,19 @@
       <p class="modal-desc">Укажите OpenAI API-ключ для активации ИИ-Советника. Ключ хранится только локально.</p>
       <form id="form-api-key" onsubmit="saveApiKey(event)">
         <div class="form-group">
+          <label class="form-label" for="ai-provider">Провайдер ИИ</label>
+          <select id="ai-provider" class="form-select" onchange="toggleApiInputs()">
+            <option value="openai">OpenAI (GPT-4o)</option>
+            <option value="gemini">Google Gemini</option>
+          </select>
+        </div>
+        <div class="form-group" id="group-openai-key">
           <label class="form-label" for="api-key-input">OpenAI API Key</label>
           <input type="password" id="api-key-input" class="form-input" placeholder="sk-..." />
+        </div>
+        <div class="form-group" id="group-gemini-key" style="display: none;">
+          <label class="form-label" for="gemini-key-input">Gemini API Key</label>
+          <input type="password" id="gemini-key-input" class="form-input" placeholder="AIza..." />
         </div>
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-api-key')">Отмена</button>
@@ -337,10 +348,10 @@
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/db.js?v=4"></script>
-  <script src="js/calculator.js?v=4"></script>
-  <script src="js/ui.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/db.js?v=5"></script>
+  <script src="js/calculator.js?v=5"></script>
+  <script src="js/ui.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 
 </body>
 </html>

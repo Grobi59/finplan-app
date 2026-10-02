@@ -213,6 +213,20 @@ const DB = (() => {
     async setApiKey(key) {
       return this.set({ openai_api_key: key });
     },
+    async getGeminiKey() {
+      const s = await this.get();
+      return s.gemini_api_key || '';
+    },
+    async setGeminiKey(key) {
+      return this.set({ gemini_api_key: key });
+    },
+    async getAiProvider() {
+      const s = await this.get();
+      return s.ai_provider || 'openai';
+    },
+    async setAiProvider(provider) {
+      return this.set({ ai_provider: provider });
+    },
     async getLastMonth() {
       const s = await this.get();
       return s.last_month || null;
