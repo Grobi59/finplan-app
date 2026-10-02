@@ -107,37 +107,37 @@
   --md-sys-typescale-headline-small-weight:     400;
 
   /* Title Large */
-  --md-sys-typescale-title-large-size:          22px;
-  --md-sys-typescale-title-large-line-height:   28px;
+  --md-sys-typescale-title-large-size:          20px;
+  --md-sys-typescale-title-large-line-height:   26px;
   --md-sys-typescale-title-large-weight:        400;
 
   /* Title Medium */
-  --md-sys-typescale-title-medium-size:         16px;
-  --md-sys-typescale-title-medium-line-height:  24px;
+  --md-sys-typescale-title-medium-size:         15px;
+  --md-sys-typescale-title-medium-line-height:  22px;
   --md-sys-typescale-title-medium-weight:       500;
   --md-sys-typescale-title-medium-tracking:     0.15px;
 
   /* Title Small */
-  --md-sys-typescale-title-small-size:          14px;
-  --md-sys-typescale-title-small-line-height:   20px;
+  --md-sys-typescale-title-small-size:          13px;
+  --md-sys-typescale-title-small-line-height:   18px;
   --md-sys-typescale-title-small-weight:        500;
   --md-sys-typescale-title-small-tracking:      0.1px;
 
   /* Body Large */
-  --md-sys-typescale-body-large-size:           16px;
-  --md-sys-typescale-body-large-line-height:    24px;
+  --md-sys-typescale-body-large-size:           15px;
+  --md-sys-typescale-body-large-line-height:    22px;
   --md-sys-typescale-body-large-weight:         400;
   --md-sys-typescale-body-large-tracking:       0.5px;
 
   /* Body Medium */
-  --md-sys-typescale-body-medium-size:          14px;
-  --md-sys-typescale-body-medium-line-height:   20px;
+  --md-sys-typescale-body-medium-size:          13px;
+  --md-sys-typescale-body-medium-line-height:   18px;
   --md-sys-typescale-body-medium-weight:        400;
   --md-sys-typescale-body-medium-tracking:      0.25px;
 
   /* Body Small */
-  --md-sys-typescale-body-small-size:           12px;
-  --md-sys-typescale-body-small-line-height:    16px;
+  --md-sys-typescale-body-small-size:           11px;
+  --md-sys-typescale-body-small-line-height:    15px;
   --md-sys-typescale-body-small-weight:         400;
   --md-sys-typescale-body-small-tracking:       0.4px;
 
@@ -181,8 +181,8 @@
   /* ============================================================
      LAYOUT CONSTANTS
      ============================================================ */
-  --nav-height:     80px;   /* M3 NavigationBar height */
-  --header-height:  64px;   /* M3 TopAppBar height */
+  --nav-height:     72px;   /* M3 NavigationBar height */
+  --header-height:  56px;   /* M3 TopAppBar height */
   --safe-bottom:    env(safe-area-inset-bottom, 0px);
 
   /* ============================================================
@@ -1349,11 +1349,13 @@ ul { list-style: none; }
   inset: 0;
   background: color-mix(in srgb, var(--md-sys-color-scrim) 50%, transparent);
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
   z-index: 200;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--duration-medium2) var(--motion-standard);
+  overflow-y: auto; /* Позволяет скроллить, если клава закрыла экран */
 }
 
 .modal-overlay.open {
@@ -1365,12 +1367,14 @@ ul { list-style: none; }
 .modal-sheet {
   width: 100%;
   max-width: 480px;
-  margin: 0 auto;
+  margin: auto auto 0 auto;
   background-color: var(--md-sys-color-surface-2);
   border-radius: var(--md-sys-shape-corner-extra-large) var(--md-sys-shape-corner-extra-large) 0 0;
   padding: 16px 24px calc(24px + var(--safe-bottom));
   transform: translateY(28px);
   transition: transform var(--duration-medium4) var(--motion-decel);
+  max-height: 100%;
+  overflow-y: auto; /* Контент внутри модалки можно скроллить */
 }
 
 .modal-overlay.open .modal-sheet {

@@ -41,16 +41,23 @@ async function checkMonthReset() {
 // ============================================================
 async function submitIncome(e) {
   e.preventDefault();
+  const id     = document.getElementById('income-id')?.value;
   const amount = parseFloat(document.getElementById('income-amount').value);
   const source = document.getElementById('income-source').value || 'Поступление';
 
   if (!amount || amount <= 0) { showToast('⚠️ Введите сумму'); return; }
 
-  await DB.Incomes.add({ amount, source });
+  if (id) {
+    await DB.Incomes.update(id, { amount, source });
+    showToast(`✅ Доход обновлен`);
+  } else {
+    await DB.Incomes.add({ amount, source });
+    showToast(`✅ Доход +${fmt(amount)} добавлен`);
+  }
+  
   document.getElementById('form-income').reset();
   closeModal('modal-income');
   await renderAll();
-  showToast(`✅ Доход +${fmt(amount)} добавлен`);
   TG?.HapticFeedback?.notificationOccurred('success');
 }
 
@@ -59,16 +66,23 @@ async function submitIncome(e) {
 // ============================================================
 async function submitExpense(e) {
   e.preventDefault();
+  const id          = document.getElementById('expense-id')?.value;
   const amount      = parseFloat(document.getElementById('expense-amount').value);
   const description = document.getElementById('expense-desc').value || 'Расход';
 
   if (!amount || amount <= 0) { showToast('⚠️ Введите сумму'); return; }
 
-  await DB.Expenses.add({ amount, description });
+  if (id) {
+    await DB.Expenses.update(id, { amount, description });
+    showToast(`📉 Расход обновлен`);
+  } else {
+    await DB.Expenses.add({ amount, description });
+    showToast(`📉 Расход −${fmt(amount)} добавлен`);
+  }
+  
   document.getElementById('form-expense').reset();
   closeModal('modal-expense');
   await renderAll();
-  showToast(`📉 Расход −${fmt(amount)} добавлен`);
   TG?.HapticFeedback?.notificationOccurred('warning');
 }
 
@@ -77,6 +91,7 @@ async function submitExpense(e) {
 // ============================================================
 async function submitObligation(e) {
   e.preventDefault();
+  const id          = document.getElementById('obl-id')?.value;
   const title       = document.getElementById('obl-title').value;
   const amount      = parseFloat(document.getElementById('obl-amount').value);
   const due_day     = parseInt(document.getElementById('obl-due-day').value);
@@ -87,11 +102,17 @@ async function submitObligation(e) {
     return;
   }
 
-  await DB.Obligations.add({ title, amount, due_day, criticality });
+  if (id) {
+    await DB.Obligations.update(id, { title, amount, due_day, criticality });
+    showToast(`🔥 Обязательство «${title}» обновлено`);
+  } else {
+    await DB.Obligations.add({ title, amount, due_day, criticality });
+    showToast(`🔥 Обязательство «${title}» добавлено`);
+  }
+
   document.getElementById('form-obligation').reset();
   closeModal('modal-obligation');
   await renderAll();
-  showToast(`🔥 Обязательство «${title}» добавлено`);
   TG?.HapticFeedback?.notificationOccurred('success');
 }
 

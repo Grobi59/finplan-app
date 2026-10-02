@@ -141,6 +141,16 @@ const DB = (() => {
       const items = (await this.getAll()).filter(x => x.id !== id);
       return saveArray(COLS.OBLIGATIONS, items);
     },
+    async update(id, data) {
+      const items = await this.getAll();
+      const idx = items.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        items[idx] = { ...items[idx], ...data };
+        await saveArray(COLS.OBLIGATIONS, items);
+        return items[idx];
+      }
+      return null;
+    },
     async resetPaidForNewMonth() {
       const items = (await this.getAll()).map(x => ({ ...x, is_paid: false }));
       return saveArray(COLS.OBLIGATIONS, items);
@@ -169,6 +179,16 @@ const DB = (() => {
       const items = (await this.getAll()).filter(x => x.id !== id);
       return saveArray(COLS.INCOMES, items);
     },
+    async update(id, data) {
+      const items = await this.getAll();
+      const idx = items.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        items[idx] = { ...items[idx], ...data };
+        await saveArray(COLS.INCOMES, items);
+        return items[idx];
+      }
+      return null;
+    },
   };
 
   // ========================================================
@@ -192,6 +212,16 @@ const DB = (() => {
     async remove(id) {
       const items = (await this.getAll()).filter(x => x.id !== id);
       return saveArray(COLS.EXPENSES, items);
+    },
+    async update(id, data) {
+      const items = await this.getAll();
+      const idx = items.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        items[idx] = { ...items[idx], ...data };
+        await saveArray(COLS.EXPENSES, items);
+        return items[idx];
+      }
+      return null;
     },
   };
 

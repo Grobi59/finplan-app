@@ -170,14 +170,14 @@ async function renderOperations(filter = _currentFilter) {
     const cls      = isIncome ? 'income' : 'expense';
 
     return `
-      <div class="transaction-item" id="tx-${tx.id}">
+      <div class="transaction-item" id="tx-${tx.id}" style="cursor:pointer;" onclick="event.stopPropagation(); ${isIncome ? `editIncome('${tx.id}')` : `editExpense('${tx.id}')`}">
         <div class="tx-icon ${cls}">${icon}</div>
         <div class="tx-info">
           <div class="tx-title">${title}</div>
           <div class="tx-date">${fmtDate(tx.created_at)}</div>
         </div>
         <div class="tx-amount ${cls}">${sign}${fmt(tx.amount)}</div>
-        <button class="tx-delete" onclick="deleteTx('${tx.type}','${tx.id}')" title="Удалить">✕</button>
+        <button class="tx-delete" onclick="event.stopPropagation(); deleteTx('${tx.type}','${tx.id}')" title="Удалить">✕</button>
       </div>`;
   }).join('');
 }
@@ -225,7 +225,7 @@ async function renderObligations() {
     const paidTitle = obl.is_paid ? 'Отметить неоплаченным' : 'Отметить оплаченным';
 
     return `
-      <div class="obligation-item ${cls}${obl.is_paid ? ' paid' : ''}" id="obl-${obl.id}">
+      <div class="obligation-item ${cls}${obl.is_paid ? ' paid' : ''}" id="obl-${obl.id}" style="cursor:pointer;" onclick="editObligation('${obl.id}')">
         <div class="obl-crit"></div>
         <div class="obl-info">
           <div class="obl-title">${escHtml(obl.title)}</div>
@@ -234,8 +234,8 @@ async function renderObligations() {
         <div class="obl-right">
           <div class="obl-amount">${fmt(obl.amount)}</div>
           <div class="obl-actions">
-            <button class="obl-check-btn check-btn" onclick="toggleObligation('${obl.id}')" title="${paidTitle}">${paidIcon}</button>
-            <button class="obl-check-btn delete-btn" onclick="deleteObligation('${obl.id}')" title="Удалить">✕</button>
+            <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); toggleObligation('${obl.id}')" title="${paidTitle}">${paidIcon}</button>
+            <button class="obl-check-btn delete-btn" onclick="event.stopPropagation(); deleteObligation('${obl.id}')" title="Удалить">✕</button>
           </div>
         </div>
       </div>`;
@@ -282,6 +282,66 @@ function closeModal(id) {
 
 function closeModalOnOverlay(event, id) {
   if (event.target === document.getElementById(id)) closeModal(id);
+}
+
+// —— ADD & EDIT MODAL HELPERS ——
+function openAddObligation() {
+  document.getElementById('form-obligation').reset();
+  document.getElementById('obl-id').value = '';
+  document.getElementById('modal-obligation-title').textContent = 'Добавить обязательство';
+  openModal('modal-obligation');
+}
+
+async function editObligation(id) {
+  const obligations = await DB.Obligations.getAll();
+  const obl = obligations.find(o => o.id === id);
+  if (!obl) return;
+  document.getElementById('form-obligation').reset();
+  document.getElementById('obl-id').value = obl.id;
+  document.getElementById('obl-title').value = obl.title;
+  document.getElementById('obl-amount').value = obl.amount;
+  document.getElementById('obl-due-day').value = obl.due_day;
+  document.getElementById('obl-criticality').value = obl.criticality;
+  document.getElementById('modal-obligation-title').textContent = 'Редактировать обязательство';
+  openModal('modal-obligation');
+}
+
+function openAddIncome() {
+  document.getElementById('form-income').reset();
+  document.getElementById('income-id').value = '';
+  document.getElementById('modal-income-title').textContent = 'Добавить доход';
+  openModal('modal-income');
+}
+
+async function editIncome(id) {
+  const incomes = await DB.Incomes.getAll();
+  const inc = incomes.find(o => o.id === id);
+  if (!inc) return;
+  document.getElementById('form-income').reset();
+  document.getElementById('income-id').value = inc.id;
+  document.getElementById('income-amount').value = inc.amount;
+  document.getElementById('income-source').value = inc.source;
+  document.getElementById('modal-income-title').textContent = 'Редактировать доход';
+  openModal('modal-income');
+}
+
+function openAddExpense() {
+  document.getElementById('form-expense').reset();
+  document.getElementById('expense-id').value = '';
+  document.getElementById('modal-expense-title').textContent = 'Добавить расход';
+  openModal('modal-expense');
+}
+
+async function editExpense(id) {
+  const expenses = await DB.Expenses.getAll();
+  const exp = expenses.find(o => o.id === id);
+  if (!exp) return;
+  document.getElementById('form-expense').reset();
+  document.getElementById('expense-id').value = exp.id;
+  document.getElementById('expense-amount').value = exp.amount;
+  document.getElementById('expense-desc').value = exp.description;
+  document.getElementById('modal-expense-title').textContent = 'Редактировать расход';
+  openModal('modal-expense');
 }
 
 // ============================================================

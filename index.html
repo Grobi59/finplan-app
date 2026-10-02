@@ -33,7 +33,7 @@
         <div class="header-logo">
           <span class="logo-icon">💎</span>
           <span class="logo-text">ФинПлан</span>
-          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v14</span>
+          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v15</span>
         </div>
         <div class="header-date">
           <span id="header-date-text"></span>
@@ -92,11 +92,11 @@
 
           <!-- Быстрые действия -->
           <div class="quick-actions">
-            <button class="quick-btn btn-income" id="btn-quick-income" onclick="openModal('modal-income')">
+            <button class="quick-btn btn-income" id="btn-quick-income" onclick="openAddIncome()">
               <span class="btn-icon">⬆️</span>
               <span>Доход</span>
             </button>
-            <button class="quick-btn btn-expense" id="btn-quick-expense" onclick="openModal('modal-expense')">
+            <button class="quick-btn btn-expense" id="btn-quick-expense" onclick="openAddExpense()">
               <span class="btn-icon">⬇️</span>
               <span>Расход</span>
             </button>
@@ -119,7 +119,7 @@
         <div class="tab-content-inner">
           <div class="tab-header">
             <h1 class="tab-title">Операции</h1>
-            <button class="icon-btn" id="btn-add-income-ops" onclick="openModal('modal-income')" title="Добавить доход">+</button>
+            <button class="icon-btn" id="btn-add-income-ops" onclick="openAddIncome()" title="Добавить доход">+</button>
           </div>
           <div class="filter-tabs" role="tablist">
             <button class="filter-tab active" data-filter="all" onclick="filterOperations('all', this)">Все</button>
@@ -140,7 +140,7 @@
         <div class="tab-content-inner">
           <div class="tab-header">
             <h1 class="tab-title">Обязательства</h1>
-            <button class="icon-btn" id="btn-add-obligation" onclick="openModal('modal-obligation')" title="Добавить обязательство">+</button>
+            <button class="icon-btn" id="btn-add-obligation" onclick="openAddObligation()" title="Добавить обязательство">+</button>
           </div>
           <div id="obligations-list" class="obligations-list">
             <div class="empty-state">
@@ -243,6 +243,7 @@
       <div class="modal-handle"></div>
       <h2 class="modal-title" id="modal-income-title">Добавить доход</h2>
       <form id="form-income" onsubmit="submitIncome(event)">
+        <input type="hidden" id="income-id" value="" />
         <div class="form-group">
           <label class="form-label" for="income-amount">Сумма (₽)</label>
           <input type="number" id="income-amount" class="form-input" placeholder="0" min="0" step="any" required />
@@ -265,6 +266,7 @@
       <div class="modal-handle"></div>
       <h2 class="modal-title" id="modal-expense-title">Добавить расход</h2>
       <form id="form-expense" onsubmit="submitExpense(event)">
+        <input type="hidden" id="expense-id" value="" />
         <div class="form-group">
           <label class="form-label" for="expense-amount">Сумма (₽)</label>
           <input type="number" id="expense-amount" class="form-input" placeholder="0" min="0" step="any" required />
@@ -287,6 +289,7 @@
       <div class="modal-handle"></div>
       <h2 class="modal-title" id="modal-obligation-title">Добавить обязательство</h2>
       <form id="form-obligation" onsubmit="submitObligation(event)">
+        <input type="hidden" id="obl-id" value="" />
         <div class="form-group">
           <label class="form-label" for="obl-title">Название</label>
           <input type="text" id="obl-title" class="form-input" placeholder="Аренда, Кредит, Налоги..." required />
@@ -350,10 +353,10 @@
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/db.js?v=14"></script>
-  <script src="js/calculator.js?v=14"></script>
-  <script src="js/ui.js?v=14"></script>
-  <script src="js/app.js?v=14"></script>
+  <script src="js/db.js?v=15"></script>
+  <script src="js/calculator.js?v=15"></script>
+  <script src="js/ui.js?v=15"></script>
+  <script src="js/app.js?v=15"></script>
 
 </body>
 </html>
