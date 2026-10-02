@@ -236,9 +236,12 @@ async function sendMessage() {
       // Согласно подсказке от API Google в 2026 году, актуальная модель — gemini-3.8-flash
       const modelId = 'gemini-3.8-flash';
       
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${geminiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-goog-api-key': geminiKey 
+        },
         body: JSON.stringify({
           systemInstruction: {
             parts: [{ text: systemPrompt }]
