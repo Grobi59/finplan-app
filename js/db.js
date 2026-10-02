@@ -16,7 +16,7 @@ const DB = (() => {
   // ——— Detect storage provider ———
   const TG = window.Telegram?.WebApp;
   const CS = TG?.CloudStorage;
-  const useTelegramCloud = !!CS;
+  const useTelegramCloud = !!CS && (TG.isVersionAtLeast ? TG.isVersionAtLeast('6.9') : false);
 
   // ——— Keys ———
   const KEYS = {
@@ -29,54 +29,98 @@ const DB = (() => {
   // ——— Low-level storage adapter ———
   const Storage = {
 
-    /**
-     * Read a string value by key.
-     * Returns null if not found.
-     */
     get(key) {
       return new Promise((resolve) => {
-        if (useTelegramCloud) {
-          CS.getItem(key, (err, value) => {
-            // value is empty string '' when key doesn't exist
-            resolve((!err && value) ? value : null);
-          });
-        } else {
-          resolve(localStorage.getItem(key));
+        if (!useTelegramCloud) {
+          return resolve(localStorage.getItem(key));
         }
-      });
-    },
 
-    /**
-     * Write a string value by key.
-     */
-    set(key, value) {
-      return new Promise((resolve, reject) => {
-        if (useTelegramCloud) {
-          CS.setItem(key, value, (err, success) => {
-            if (err) reject(new Error(String(err)));
-            else resolve(success);
+        let answered = false;
+        const timer = setTimeout(() => {
+          if (!answered) {
+            answered = true;
+            console.warn(`[DB] CloudStorage get timeout for ${key}, fallback to localStorage`);
+            resolve(localStorage.getItem(key));
+          }
+        }, 1000);
+
+        try {
+          CS.getItem(key, (err, value) => {
+            if (answered) return;
+            answered = true;
+            clearTimeout(timer);
+            if (err) resolve(localStorage.getItem(key)); // fallback on error
+            else resolve(value ? value : null);
           });
-        } else {
-          try {
-            localStorage.setItem(key, value);
-            resolve(true);
-          } catch (e) {
-            reject(e);
+        } catch (e) {
+          if (!answered) {
+            answered = true;
+            clearTimeout(timer);
+            resolve(localStorage.getItem(key));
           }
         }
       });
     },
 
-    /**
-     * Delete a key.
-     */
+    set(key, value) {
+      return new Promise((resolve) => {
+        // Всегда дублируем локально для надежности
+        try { localStorage.setItem(key, value); } catch(e) {}
+
+        if (!useTelegramCloud) return resolve(true);
+
+        let answered = false;
+        const timer = setTimeout(() => {
+          if (!answered) {
+            answered = true;
+            resolve(true); // already saved locally
+          }
+        }, 1000);
+
+        try {
+          CS.setItem(key, value, (err, success) => {
+            if (answered) return;
+            answered = true;
+            clearTimeout(timer);
+            resolve(!err && success);
+          });
+        } catch (e) {
+          if (!answered) {
+            answered = true;
+            clearTimeout(timer);
+            resolve(true);
+          }
+        }
+      });
+    },
+
     remove(key) {
       return new Promise((resolve) => {
-        if (useTelegramCloud) {
-          CS.removeItem(key, () => resolve());
-        } else {
-          localStorage.removeItem(key);
-          resolve();
+        try { localStorage.removeItem(key); } catch(e) {}
+
+        if (!useTelegramCloud) return resolve();
+
+        let answered = false;
+        const timer = setTimeout(() => {
+          if (!answered) {
+            answered = true;
+            resolve();
+          }
+        }, 1000);
+
+        try {
+          CS.removeItem(key, (err, success) => {
+            if (answered) return;
+            answered = true;
+            clearTimeout(timer);
+            resolve();
+          });
+        } catch (e) {
+          if (!answered) {
+            answered = true;
+            clearTimeout(timer);
+            resolve();
+          }
         }
       });
     },
