@@ -233,7 +233,16 @@ async function sendMessage() {
         parts: [{ text: m.content }]
       }));
       
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiKey}`, {
+      // Динамически получаем доступную модель Flash (чтобы избежать ошибки "model not found" в 2026+)
+      const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`);
+      if (!modelsRes.ok) throw new Error('Не удалось получить список моделей Gemini. Проверьте ключ.');
+      const modelsData = await modelsRes.json();
+      
+      // Ищем модель со словом 'flash' и поддержкой generateContent
+      const flashModelObj = modelsData.models?.find(m => m.name.includes('flash') && m.supportedGenerationMethods.includes('generateContent'));
+      const modelId = flashModelObj ? flashModelObj.name.replace('models/', '') : 'gemini-1.5-flash'; // Fallback
+      
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${geminiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
