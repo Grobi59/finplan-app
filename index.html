@@ -12,6 +12,8 @@
   <!-- PWA / TWA Meta -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1A1C1E" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,7 +35,7 @@
         <div class="header-logo">
           <span class="logo-icon">💎</span>
           <span class="logo-text">ФинПлан</span>
-          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v15</span>
+          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v16</span>
         </div>
         <div class="header-date">
           <span id="header-date-text"></span>
@@ -151,6 +153,37 @@
         </div>
       </section>
 
+      <!-- TAB: Планируемые -->
+      <section class="tab-panel" id="tab-planned" role="tabpanel" aria-labelledby="nav-planned">
+        <div class="tab-content-inner">
+          <div class="tab-header">
+            <h1 class="tab-title">Ожидания</h1>
+            <button class="icon-btn" id="btn-add-planned" onclick="openAddPlanned()" title="Добавить ожидание">+</button>
+          </div>
+          <div id="planned-list" class="obligations-list">
+            <div class="empty-state">
+              <div class="empty-icon">⏳</div>
+              <p>Нет ожидаемых поступлений.<br>Добавьте планируемый доход.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Графики -->
+      <section class="tab-panel" id="tab-analytics" role="tabpanel" aria-labelledby="nav-analytics">
+        <div class="tab-content-inner">
+          <div class="tab-header">
+            <h1 class="tab-title">Аналитика</h1>
+          </div>
+          <div class="chart-container" style="background: var(--md-sys-color-surface-1); border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+            <canvas id="balanceChart" style="width:100%; height:250px;"></canvas>
+          </div>
+          <div class="chart-container" style="background: var(--md-sys-color-surface-1); border-radius: 16px; padding: 16px;">
+            <canvas id="expenseChart" style="width:100%; height:250px;"></canvas>
+          </div>
+        </div>
+      </section>
+
       <!-- TAB: ИИ-Советник -->
       <section class="tab-panel" id="tab-ai" role="tabpanel" aria-labelledby="nav-ai">
         <div class="ai-chat-wrapper">
@@ -225,7 +258,15 @@
       </button>
       <button class="nav-item" id="nav-obligations" role="tab" aria-selected="false" aria-controls="tab-obligations" onclick="switchTab('obligations', this)">
         <span class="nav-icon">🔥</span>
-        <span class="nav-label">Обязательства</span>
+        <span class="nav-label">Обязат-ва</span>
+      </button>
+      <button class="nav-item" id="nav-planned" role="tab" aria-selected="false" aria-controls="tab-planned" onclick="switchTab('planned', this)">
+        <span class="nav-icon">⏳</span>
+        <span class="nav-label">Ожидания</span>
+      </button>
+      <button class="nav-item" id="nav-analytics" role="tab" aria-selected="false" aria-controls="tab-analytics" onclick="switchTab('analytics', this)">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Аналитика</span>
       </button>
       <button class="nav-item" id="nav-ai" role="tab" aria-selected="false" aria-controls="tab-ai" onclick="switchTab('ai', this)">
         <span class="nav-icon">🤖</span>
@@ -319,6 +360,33 @@
     </div>
   </div>
 
+  <!-- Modal: Add Planned Income -->
+  <div class="modal-overlay" id="modal-planned" role="dialog" aria-modal="true" aria-labelledby="modal-planned-title" onclick="closeModalOnOverlay(event, 'modal-planned')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-planned-title">Добавить ожидание</h2>
+      <form id="form-planned" onsubmit="submitPlanned(event)">
+        <input type="hidden" id="planned-id" value="" />
+        <div class="form-group">
+          <label class="form-label" for="planned-source">Источник</label>
+          <input type="text" id="planned-source" class="form-input" placeholder="Аванс, Клиент..." required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="planned-amount">Сумма (₽)</label>
+          <input type="number" id="planned-amount" class="form-input" placeholder="0" min="0" step="any" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="planned-day">Ожидается (день месяца)</label>
+          <input type="number" id="planned-day" class="form-input" placeholder="1" min="1" max="31" required />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-planned')">Отмена</button>
+          <button type="submit" class="btn btn-primary">Добавить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal: API Key -->
   <div class="modal-overlay" id="modal-api-key" role="dialog" aria-modal="true" aria-labelledby="modal-api-key-title" onclick="closeModalOnOverlay(event, 'modal-api-key')">
     <div class="modal-sheet">
@@ -353,10 +421,10 @@
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/db.js?v=15"></script>
-  <script src="js/calculator.js?v=15"></script>
-  <script src="js/ui.js?v=15"></script>
-  <script src="js/app.js?v=15"></script>
+  <script src="js/db.js?v=16"></script>
+  <script src="js/calculator.js?v=16"></script>
+  <script src="js/ui.js?v=16"></script>
+  <script src="js/app.js?v=16"></script>
 
 </body>
 </html>

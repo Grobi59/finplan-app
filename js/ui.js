@@ -255,6 +255,134 @@ async function deleteObligation(id) {
 }
 
 // ============================================================
+// PLANNED INCOMES
+// ============================================================
+async function renderPlanned() {
+  const container = document.getElementById('planned-list');
+  const items = (await DB.PlannedIncomes.getAll()).sort((a, b) => a.expected_day - b.expected_day);
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <p>Нет ожидаемых поступлений.<br>Добавьте планируемый доход.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = items.map(obl => {
+    const daysLeft = Calculator.daysUntilDueDay(obl.expected_day);
+    const dayLabel = daysLeft === 0 ? 'Сегодня' :
+                     daysLeft === 1 ? 'Завтра' :
+                     `${obl.expected_day}-е число (через ${daysLeft} дн.)`;
+    const paidLabel = obl.is_received ? ' · ✅ Получено' : '';
+    const paidIcon  = obl.is_received ? '↩️' : '✅';
+    const paidTitle = obl.is_received ? 'Отметить не полученным' : 'Отметить полученным';
+
+    return `
+      <div class="obligation-item medium${obl.is_received ? ' paid' : ''}" id="plan-${obl.id}" style="cursor:pointer;" onclick="editPlanned('${obl.id}')">
+        <div class="obl-crit" style="background: var(--md-sys-color-tertiary)"></div>
+        <div class="obl-info">
+          <div class="obl-title">${escHtml(obl.source)}</div>
+          <div class="obl-meta">⏳ Ожидается · ${dayLabel}${paidLabel}</div>
+        </div>
+        <div class="obl-right">
+          <div class="obl-amount" style="color: var(--md-sys-color-tertiary)">+${fmt(obl.amount)}</div>
+          <div class="obl-actions">
+            <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); togglePlanned('${obl.id}')" title="${paidTitle}">${paidIcon}</button>
+            <button class="obl-check-btn delete-btn" onclick="event.stopPropagation(); deletePlanned('${obl.id}')" title="Удалить">✕</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function togglePlanned(id) {
+  await DB.PlannedIncomes.toggleReceived(id);
+  await renderAll();
+  showToast('Статус ожидания обновлён');
+}
+
+async function deletePlanned(id) {
+  await DB.PlannedIncomes.remove(id);
+  await renderAll();
+  showToast('Ожидание удалено');
+}
+
+// ============================================================
+// ANALYTICS (Chart.js)
+// ============================================================
+let _balanceChart = null;
+let _expenseChart = null;
+
+async function renderAnalytics() {
+  if (!window.Chart) return;
+  const ctxBalance = document.getElementById('balanceChart')?.getContext('2d');
+  const ctxExpense = document.getElementById('expenseChart')?.getContext('2d');
+  if (!ctxBalance || !ctxExpense) return;
+
+  const [incomes, expenses] = await Promise.all([
+    DB.Incomes.getAll(),
+    DB.Expenses.getAll()
+  ]);
+
+  if (_balanceChart) _balanceChart.destroy();
+  if (_expenseChart) _expenseChart.destroy();
+
+  Chart.defaults.color = '#C2C7CE';
+  Chart.defaults.font.family = 'Roboto Flex';
+
+  const incTotal = incomes.reduce((s, x) => s + x.amount, 0);
+  const expTotal = expenses.reduce((s, x) => s + x.amount, 0);
+
+  _balanceChart = new Chart(ctxBalance, {
+    type: 'doughnut',
+    data: {
+      labels: ['Доходы', 'Расходы'],
+      datasets: [{
+        data: [incTotal, expTotal],
+        backgroundColor: ['#74D7A0', '#FFB4AB'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { title: { display: true, text: 'Соотношение (все время)' } }
+    }
+  });
+
+  const expGroups = {};
+  expenses.forEach(e => {
+    const desc = e.description || 'Другое';
+    expGroups[desc] = (expGroups[desc] || 0) + e.amount;
+  });
+  const labels = Object.keys(expGroups);
+  const data = Object.values(expGroups);
+
+  _expenseChart = new Chart(ctxExpense, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Расходы (₽)',
+        data,
+        backgroundColor: '#9ECAFF',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: { display: true, text: 'Структура расходов' },
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+// ============================================================
 // GLOBAL RE-RENDER
 // Запускает все рендеры параллельно через Promise.all
 // ============================================================
@@ -264,6 +392,8 @@ async function renderAll() {
     renderUpcoming(),
     renderOperations(),
     renderObligations(),
+    renderPlanned(),
+    renderAnalytics()
   ]);
 }
 
@@ -342,6 +472,26 @@ async function editExpense(id) {
   document.getElementById('expense-desc').value = exp.description;
   document.getElementById('modal-expense-title').textContent = 'Редактировать расход';
   openModal('modal-expense');
+}
+
+function openAddPlanned() {
+  document.getElementById('form-planned').reset();
+  document.getElementById('planned-id').value = '';
+  document.getElementById('modal-planned-title').textContent = 'Добавить ожидание';
+  openModal('modal-planned');
+}
+
+async function editPlanned(id) {
+  const items = await DB.PlannedIncomes.getAll();
+  const obl = items.find(o => o.id === id);
+  if (!obl) return;
+  document.getElementById('form-planned').reset();
+  document.getElementById('planned-id').value = obl.id;
+  document.getElementById('planned-source').value = obl.source;
+  document.getElementById('planned-amount').value = obl.amount;
+  document.getElementById('planned-day').value = obl.expected_day;
+  document.getElementById('modal-planned-title').textContent = 'Редактировать ожидание';
+  openModal('modal-planned');
 }
 
 // ============================================================

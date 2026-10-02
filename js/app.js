@@ -117,6 +117,35 @@ async function submitObligation(e) {
 }
 
 // ============================================================
+// FORM: ОЖИДАНИЕ (PLANNED)
+// ============================================================
+async function submitPlanned(e) {
+  e.preventDefault();
+  const id          = document.getElementById('planned-id')?.value;
+  const source      = document.getElementById('planned-source').value;
+  const amount      = parseFloat(document.getElementById('planned-amount').value);
+  const expected_day = parseInt(document.getElementById('planned-day').value);
+
+  if (!source || !amount || !expected_day) {
+    showToast('⚠️ Заполните все поля');
+    return;
+  }
+
+  if (id) {
+    await DB.PlannedIncomes.update(id, { source, amount, expected_day });
+    showToast(`⏳ Ожидание «${source}» обновлено`);
+  } else {
+    await DB.PlannedIncomes.add({ source, amount, expected_day });
+    showToast(`⏳ Ожидание «${source}» добавлено`);
+  }
+
+  document.getElementById('form-planned').reset();
+  closeModal('modal-planned');
+  await renderAll();
+  TG?.HapticFeedback?.notificationOccurred('success');
+}
+
+// ============================================================
 // API KEY
 // ============================================================
 function toggleApiInputs() {

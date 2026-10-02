@@ -266,10 +266,65 @@ const DB = (() => {
     },
   };
 
+  // ========================================================
+  // PLANNED INCOMES («Планируемые поступления»)
+  // Хранятся внутри settings, чтобы не менять схему БД Supabase
+  // ========================================================
+  const PlannedIncomes = {
+    async getAll() {
+      const s = await Settings.get();
+      return s.planned_incomes || [];
+    },
+    async _save(arr) {
+      return Settings.set({ planned_incomes: arr });
+    },
+    async add({ source, amount, expected_day }) {
+      const items = await this.getAll();
+      const item = {
+        id: genId(),
+        source: String(source || 'Ожидание').trim(),
+        amount: parseFloat(amount) || 0,
+        expected_day: parseInt(expected_day) || 1,
+        is_received: false,
+        created_at: new Date().toISOString(),
+      };
+      items.push(item);
+      await this._save(items);
+      return item;
+    },
+    async remove(id) {
+      const items = (await this.getAll()).filter(x => x.id !== id);
+      return this._save(items);
+    },
+    async update(id, data) {
+      const items = await this.getAll();
+      const idx = items.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        items[idx] = { ...items[idx], ...data };
+        await this._save(items);
+        return items[idx];
+      }
+      return null;
+    },
+    async toggleReceived(id) {
+      const items = await this.getAll();
+      const idx = items.findIndex(x => x.id === id);
+      if (idx === -1) return null;
+      items[idx].is_received = !items[idx].is_received;
+      await this._save(items);
+      return items[idx];
+    },
+    async resetReceivedForNewMonth() {
+      const items = (await this.getAll()).map(x => ({ ...x, is_received: false }));
+      return this._save(items);
+    }
+  };
+
   return {
     Obligations,
     Incomes,
     Expenses,
+    PlannedIncomes,
     Settings,
     genId,
     // Передаем статус Supabase для отображения в UI
