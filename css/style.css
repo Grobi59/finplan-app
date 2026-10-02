@@ -1,0 +1,1723 @@
+/* ================================================
+   ФинПлан — Material Design 3 Design System
+   Dark Color Scheme · Roboto Flex · M3 Tokens
+   Seed color: #0061A4 (Financial Blue)
+   ================================================ */
+
+/* ---------- M3 GOOGLE FONTS ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,300;8..144,400;8..144,500;8..144,600;8..144,700&display=swap');
+
+/* ============================================================
+   M3 COLOR TOKENS — Dark Theme
+   Generated from seed: #0061A4
+   ============================================================ */
+:root {
+  /* —— Primary palette —— */
+  --md-sys-color-primary:             #9ECAFF;  /* tone 80 */
+  --md-sys-color-on-primary:          #003258;  /* tone 20 */
+  --md-sys-color-primary-container:   #004A77;  /* tone 30 */
+  --md-sys-color-on-primary-container:#CEE5FF;  /* tone 90 */
+
+  /* —— Secondary palette —— */
+  --md-sys-color-secondary:           #B6CAE0;  /* tone 80 */
+  --md-sys-color-on-secondary:        #1F3345;  /* tone 20 */
+  --md-sys-color-secondary-container: #354A5E;  /* tone 30 */
+  --md-sys-color-on-secondary-container: #D2E5F9; /* tone 90 */
+
+  /* —— Tertiary palette (teal-green for income) —— */
+  --md-sys-color-tertiary:            #74D7A0;  /* tone 80 */
+  --md-sys-color-on-tertiary:         #003824;  /* tone 20 */
+  --md-sys-color-tertiary-container:  #005236;  /* tone 30 */
+  --md-sys-color-on-tertiary-container:#8FF5BC; /* tone 90 */
+
+  /* —— Error palette (red for danger/expenses) —— */
+  --md-sys-color-error:               #FFB4AB;  /* tone 80 */
+  --md-sys-color-on-error:            #690005;  /* tone 20 */
+  --md-sys-color-error-container:     #93000A;  /* tone 30 */
+  --md-sys-color-on-error-container:  #FFDAD6;  /* tone 90 */
+
+  /* —— Warning / Yellow (custom, not in spec but needed) —— */
+  --md-sys-color-warning:             #E8C84A;
+  --md-sys-color-warning-container:   #4A3800;
+  --md-sys-color-on-warning-container:#FFDF87;
+
+  /* —— Surface & Background —— */
+  --md-sys-color-background:          #1A1C1E;  /* tone 6 */
+  --md-sys-color-on-background:       #E2E2E6;  /* tone 90 */
+  --md-sys-color-surface:             #1A1C1E;  /* = background */
+  --md-sys-color-on-surface:          #E2E2E6;
+  --md-sys-color-surface-variant:     #42474E;  /* tone 30 */
+  --md-sys-color-on-surface-variant:  #C2C7CE;  /* tone 80 */
+
+  /* —— Surface tones (M3 elevation via tonal overlay) —— */
+  --md-sys-color-surface-1:  color-mix(in srgb, var(--md-sys-color-primary) 5%,  var(--md-sys-color-surface));
+  --md-sys-color-surface-2:  color-mix(in srgb, var(--md-sys-color-primary) 8%,  var(--md-sys-color-surface));
+  --md-sys-color-surface-3:  color-mix(in srgb, var(--md-sys-color-primary) 11%, var(--md-sys-color-surface));
+  --md-sys-color-surface-4:  color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface));
+  --md-sys-color-surface-5:  color-mix(in srgb, var(--md-sys-color-primary) 14%, var(--md-sys-color-surface));
+
+  /* —— Outline —— */
+  --md-sys-color-outline:             #8C9199;  /* tone 50 */
+  --md-sys-color-outline-variant:     #42474E;  /* tone 30 */
+
+  /* —— Inverse —— */
+  --md-sys-color-inverse-surface:     #E2E2E6;
+  --md-sys-color-inverse-on-surface:  #2F3033;
+  --md-sys-color-inverse-primary:     #0061A4;
+
+  /* —— Scrim —— */
+  --md-sys-color-scrim:               #000000;
+
+  /* ============================================================
+     M3 TYPOGRAPHY SCALE
+     Font: Roboto Flex
+     ============================================================ */
+
+  /* Display Large */
+  --md-sys-typescale-display-large-font:        'Roboto Flex', sans-serif;
+  --md-sys-typescale-display-large-size:        57px;
+  --md-sys-typescale-display-large-line-height: 64px;
+  --md-sys-typescale-display-large-weight:      400;
+  --md-sys-typescale-display-large-tracking:    -0.25px;
+
+  /* Display Medium */
+  --md-sys-typescale-display-medium-size:       45px;
+  --md-sys-typescale-display-medium-line-height:52px;
+  --md-sys-typescale-display-medium-weight:     400;
+  --md-sys-typescale-display-medium-tracking:   0px;
+
+  /* Display Small */
+  --md-sys-typescale-display-small-size:        36px;
+  --md-sys-typescale-display-small-line-height: 44px;
+  --md-sys-typescale-display-small-weight:      400;
+
+  /* Headline Large */
+  --md-sys-typescale-headline-large-size:       32px;
+  --md-sys-typescale-headline-large-line-height:40px;
+  --md-sys-typescale-headline-large-weight:     400;
+
+  /* Headline Medium */
+  --md-sys-typescale-headline-medium-size:      28px;
+  --md-sys-typescale-headline-medium-line-height:36px;
+  --md-sys-typescale-headline-medium-weight:    400;
+
+  /* Headline Small */
+  --md-sys-typescale-headline-small-size:       24px;
+  --md-sys-typescale-headline-small-line-height:32px;
+  --md-sys-typescale-headline-small-weight:     400;
+
+  /* Title Large */
+  --md-sys-typescale-title-large-size:          22px;
+  --md-sys-typescale-title-large-line-height:   28px;
+  --md-sys-typescale-title-large-weight:        400;
+
+  /* Title Medium */
+  --md-sys-typescale-title-medium-size:         16px;
+  --md-sys-typescale-title-medium-line-height:  24px;
+  --md-sys-typescale-title-medium-weight:       500;
+  --md-sys-typescale-title-medium-tracking:     0.15px;
+
+  /* Title Small */
+  --md-sys-typescale-title-small-size:          14px;
+  --md-sys-typescale-title-small-line-height:   20px;
+  --md-sys-typescale-title-small-weight:        500;
+  --md-sys-typescale-title-small-tracking:      0.1px;
+
+  /* Body Large */
+  --md-sys-typescale-body-large-size:           16px;
+  --md-sys-typescale-body-large-line-height:    24px;
+  --md-sys-typescale-body-large-weight:         400;
+  --md-sys-typescale-body-large-tracking:       0.5px;
+
+  /* Body Medium */
+  --md-sys-typescale-body-medium-size:          14px;
+  --md-sys-typescale-body-medium-line-height:   20px;
+  --md-sys-typescale-body-medium-weight:        400;
+  --md-sys-typescale-body-medium-tracking:      0.25px;
+
+  /* Body Small */
+  --md-sys-typescale-body-small-size:           12px;
+  --md-sys-typescale-body-small-line-height:    16px;
+  --md-sys-typescale-body-small-weight:         400;
+  --md-sys-typescale-body-small-tracking:       0.4px;
+
+  /* Label Large */
+  --md-sys-typescale-label-large-size:          14px;
+  --md-sys-typescale-label-large-line-height:   20px;
+  --md-sys-typescale-label-large-weight:        500;
+  --md-sys-typescale-label-large-tracking:      0.1px;
+
+  /* Label Medium */
+  --md-sys-typescale-label-medium-size:         12px;
+  --md-sys-typescale-label-medium-line-height:  16px;
+  --md-sys-typescale-label-medium-weight:       500;
+  --md-sys-typescale-label-medium-tracking:     0.5px;
+
+  /* Label Small */
+  --md-sys-typescale-label-small-size:          11px;
+  --md-sys-typescale-label-small-line-height:   16px;
+  --md-sys-typescale-label-small-weight:        500;
+  --md-sys-typescale-label-small-tracking:      0.5px;
+
+  /* ============================================================
+     M3 SHAPE SCALE
+     ============================================================ */
+  --md-sys-shape-corner-none:         0px;
+  --md-sys-shape-corner-extra-small:  4px;
+  --md-sys-shape-corner-small:        8px;
+  --md-sys-shape-corner-medium:       12px;
+  --md-sys-shape-corner-large:        16px;
+  --md-sys-shape-corner-extra-large:  28px;
+  --md-sys-shape-corner-full:         9999px;
+
+  /* ============================================================
+     M3 ELEVATION — State Layer Opacity
+     ============================================================ */
+  --md-sys-state-hover-opacity:     0.08;
+  --md-sys-state-focus-opacity:     0.12;
+  --md-sys-state-pressed-opacity:   0.12;
+  --md-sys-state-dragged-opacity:   0.16;
+
+  /* ============================================================
+     LAYOUT CONSTANTS
+     ============================================================ */
+  --nav-height:     80px;   /* M3 NavigationBar height */
+  --header-height:  64px;   /* M3 TopAppBar height */
+  --safe-bottom:    env(safe-area-inset-bottom, 0px);
+
+  /* ============================================================
+     SEMANTIC SHORTCUTS (app-level aliases)
+     ============================================================ */
+  --color-income:   var(--md-sys-color-tertiary);
+  --color-income-container: var(--md-sys-color-tertiary-container);
+  --color-income-on-container: var(--md-sys-color-on-tertiary-container);
+
+  --color-expense:  var(--md-sys-color-error);
+  --color-expense-container: var(--md-sys-color-error-container);
+  --color-expense-on-container: var(--md-sys-color-on-error-container);
+
+  --color-warning:  var(--md-sys-color-warning);
+  --color-warning-container: var(--md-sys-color-warning-container);
+  --color-warning-on-container: var(--md-sys-color-on-warning-container);
+
+  --motion-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-decel:    cubic-bezier(0, 0, 0, 1);
+  --motion-accel:    cubic-bezier(0.3, 0, 1, 1);
+  --duration-short2: 100ms;
+  --duration-short4: 200ms;
+  --duration-medium2:300ms;
+  --duration-medium4:450ms;
+  --duration-long2:  500ms;
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  height: 100%;
+  overscroll-behavior: none;
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Roboto Flex', -apple-system, sans-serif;
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  min-height: 100%;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--md-sys-typescale-body-large-size);
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  letter-spacing: var(--md-sys-typescale-body-large-tracking);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+ul { list-style: none; }
+
+/* ============================================================
+   M3 STATE LAYER MIXIN (via pseudo-element)
+   ============================================================ */
+.m3-state {
+  position: relative;
+  overflow: hidden;
+}
+
+.m3-state::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-short2) var(--motion-standard);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.m3-state:hover::after  { opacity: var(--md-sys-state-hover-opacity); }
+.m3-state:focus::after  { opacity: var(--md-sys-state-focus-opacity); }
+.m3-state:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ============================================================
+   M3 TOP APP BAR (Small)
+   ============================================================ */
+#app-header {
+  flex-shrink: 0;
+  height: var(--header-height);
+  background-color: var(--md-sys-color-surface-2);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.logo-text {
+  font-size: var(--md-sys-typescale-title-large-size);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  letter-spacing: 0;
+}
+
+.header-date {
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ============================================================
+   CONTENT AREA
+   ============================================================ */
+#app-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.tab-panel {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition:
+    opacity var(--duration-short4) var(--motion-standard),
+    transform var(--duration-short4) var(--motion-standard);
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+}
+
+.tab-panel.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   HOME TAB
+   ============================================================ */
+.home-hero {
+  padding: 24px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* —— Traffic Light / Светофор —— */
+.traffic-light-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-label {
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* M3 Card (Filled) as traffic light */
+.traffic-light {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background-color: var(--md-sys-color-surface-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition:
+    background-color var(--duration-medium2) var(--motion-standard),
+    box-shadow var(--duration-medium2) var(--motion-standard);
+}
+
+/* Green state */
+.traffic-light.green {
+  background-color: var(--md-sys-color-tertiary-container);
+  box-shadow: 0 0 48px color-mix(in srgb, var(--md-sys-color-tertiary) 30%, transparent);
+}
+
+/* Yellow state */
+.traffic-light.yellow {
+  background-color: var(--md-sys-color-warning-container);
+  box-shadow: 0 0 48px color-mix(in srgb, var(--md-sys-color-warning) 30%, transparent);
+}
+
+/* Red state */
+.traffic-light.red {
+  background-color: var(--md-sys-color-error-container);
+  box-shadow: 0 0 48px color-mix(in srgb, var(--md-sys-color-error) 30%, transparent);
+  animation: tl-pulse 2.4s var(--motion-standard) infinite;
+}
+
+@keyframes tl-pulse {
+  0%, 100% { box-shadow: 0 0 48px color-mix(in srgb, var(--md-sys-color-error) 30%, transparent); }
+  50%       { box-shadow: 0 0 72px color-mix(in srgb, var(--md-sys-color-error) 48%, transparent); }
+}
+
+.tl-glow { display: none; }
+
+/* Display Large for amount */
+.tl-amount {
+  font-size: clamp(26px, 7vw, var(--md-sys-typescale-display-small-size));
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: var(--md-sys-typescale-display-small-tracking, -0.5px);
+  transition: color var(--duration-medium2) var(--motion-standard);
+  text-align: center;
+  padding: 0 12px;
+}
+
+.traffic-light.green  .tl-amount { color: var(--md-sys-color-on-tertiary-container); }
+.traffic-light.yellow .tl-amount { color: var(--md-sys-color-on-warning-container); }
+.traffic-light.red    .tl-amount { color: var(--md-sys-color-on-error-container); }
+
+.tl-status {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 4px;
+  text-align: center;
+  padding: 0 12px;
+}
+
+.traffic-light.green  .tl-status { color: var(--md-sys-color-on-tertiary-container); opacity: 0.8; }
+.traffic-light.yellow .tl-status { color: var(--md-sys-color-on-warning-container); opacity: 0.8; }
+.traffic-light.red    .tl-status { color: var(--md-sys-color-on-error-container); opacity: 0.8; }
+
+/* —— M3 Metrics Grid — Filled Cards —— */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* M3 Filled Card */
+.metric-card {
+  background-color: var(--md-sys-color-surface-1);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background-color var(--duration-short4) var(--motion-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--md-sys-color-on-surface);
+  opacity: 0;
+  transition: opacity var(--duration-short2) var(--motion-standard);
+  border-radius: inherit;
+}
+
+.metric-card:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+
+.metric-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metric-value {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  letter-spacing: 0;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+}
+
+/* —— M3 Extended FAB (Quick Actions) —— */
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* M3 Filled Tonal Button */
+.quick-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow var(--duration-short4) var(--motion-standard),
+    transform var(--duration-short2) var(--motion-accel);
+}
+
+.quick-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-short2) var(--motion-standard);
+}
+
+.quick-btn:hover::after  { opacity: var(--md-sys-state-hover-opacity); }
+.quick-btn:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+.quick-btn:active        { transform: scale(0.97); }
+
+.btn-income {
+  background-color: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+.btn-income:hover {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-tertiary) 25%, transparent);
+}
+
+.btn-expense {
+  background-color: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+
+.btn-expense:hover {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-error) 25%, transparent);
+}
+
+.btn-icon { font-size: 18px; line-height: 1; }
+
+/* —— Upcoming Section —— */
+.upcoming-section {}
+
+/* M3 Label Large for section headings */
+.section-title {
+  font-size: var(--md-sys-typescale-title-small-size);
+  font-weight: var(--md-sys-typescale-title-small-weight);
+  letter-spacing: var(--md-sys-typescale-title-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* M3 List Item */
+.upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--md-sys-color-surface-1);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 10px 16px;
+}
+
+.upcoming-item .crit-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--md-sys-shape-corner-full);
+  flex-shrink: 0;
+}
+
+.upcoming-item.high .crit-dot   { background: var(--md-sys-color-error); }
+.upcoming-item.medium .crit-dot { background: var(--md-sys-color-warning); }
+.upcoming-item.low .crit-dot    { background: var(--md-sys-color-tertiary); }
+
+.upcoming-title {
+  flex: 1;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: 500;
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--md-sys-color-on-surface);
+}
+
+.upcoming-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.upcoming-amount {
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-error);
+}
+
+.upcoming-day {
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ============================================================
+   GENERIC TAB CONTENT
+   ============================================================ */
+.tab-content-inner {
+  padding: 16px;
+}
+
+.tab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+/* M3 Headline Medium */
+.tab-title {
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  line-height: var(--md-sys-typescale-headline-medium-line-height);
+  font-weight: var(--md-sys-typescale-headline-medium-weight);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* M3 FAB Small */
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 24px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow var(--duration-short4) var(--motion-standard),
+    transform var(--duration-short2) var(--motion-accel);
+  line-height: 1;
+}
+
+.icon-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-short2) var(--motion-standard);
+}
+
+.icon-btn:hover {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+}
+
+.icon-btn:hover::after  { opacity: var(--md-sys-state-hover-opacity); }
+.icon-btn:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+.icon-btn:active        { transform: scale(0.92); }
+
+/* M3 Filter Chip Row */
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 0 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filter-tabs::-webkit-scrollbar { display: none; }
+
+/* M3 Filter Chip */
+.filter-tab {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: var(--md-sys-shape-corner-small);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color var(--duration-short4) var(--motion-standard),
+    color var(--duration-short4) var(--motion-standard),
+    border-color var(--duration-short4) var(--motion-standard);
+}
+
+.filter-tab.active {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border-color: transparent;
+}
+
+/* ============================================================
+   M3 LIST — TRANSACTIONS
+   ============================================================ */
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* M3 lists have minimal gap */
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: transparent;
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 10px 16px;
+  animation: item-enter var(--duration-medium2) var(--motion-decel);
+  position: relative;
+  overflow: hidden;
+  transition: background-color var(--duration-short2) var(--motion-standard);
+}
+
+.transaction-item:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+}
+
+@keyframes item-enter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* M3 Leading Icon Container */
+.tx-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.tx-icon.income  { background-color: var(--md-sys-color-tertiary-container); }
+.tx-icon.expense { background-color: var(--md-sys-color-error-container); }
+
+.tx-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-title {
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  letter-spacing: 0;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-date {
+  font-size: var(--md-sys-typescale-body-small-size);
+  font-weight: var(--md-sys-typescale-body-small-weight);
+  letter-spacing: var(--md-sys-typescale-body-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 2px;
+}
+
+.tx-amount {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  letter-spacing: 0;
+  flex-shrink: 0;
+}
+
+.tx-amount.income  { color: var(--md-sys-color-tertiary); }
+.tx-amount.expense { color: var(--md-sys-color-error); }
+
+.tx-delete {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent);
+  color: var(--md-sys-color-error);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-short2) var(--motion-standard);
+  flex-shrink: 0;
+}
+
+.transaction-item:hover .tx-delete { opacity: 1; }
+
+/* ============================================================
+   OBLIGATIONS LIST
+   ============================================================ */
+.obligations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* M3 Outlined Card */
+.obligation-item {
+  background-color: var(--md-sys-color-surface-1);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: item-enter var(--duration-medium2) var(--motion-decel);
+  transition: opacity var(--duration-medium2) var(--motion-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.obligation-item.paid { opacity: 0.45; }
+
+/* Criticality indicator — M3 tonal strip */
+.obl-crit {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.high   .obl-crit { background: var(--md-sys-color-error); }
+.medium .obl-crit { background: var(--md-sys-color-warning); }
+.low    .obl-crit { background: var(--md-sys-color-tertiary); }
+
+.obl-info { flex: 1; min-width: 0; }
+
+.obl-title {
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.obl-meta {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 3px;
+}
+
+.obl-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.obl-amount {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  letter-spacing: 0;
+}
+
+.high   .obl-amount { color: var(--md-sys-color-error); }
+.medium .obl-amount { color: var(--md-sys-color-warning); }
+.low    .obl-amount { color: var(--md-sys-color-tertiary); }
+
+.obl-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* M3 Icon Button */
+.obl-check-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--md-sys-shape-corner-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--duration-short2) var(--motion-accel);
+}
+
+.obl-check-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-short2);
+}
+
+.obl-check-btn:hover::after  { opacity: var(--md-sys-state-hover-opacity); }
+.obl-check-btn:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+.obl-check-btn:active        { transform: scale(0.88); }
+
+.obl-check-btn.check-btn {
+  background: color-mix(in srgb, var(--md-sys-color-tertiary) 12%, transparent);
+  color: var(--md-sys-color-tertiary);
+}
+
+.obl-check-btn.delete-btn {
+  background: color-mix(in srgb, var(--md-sys-color-error) 12%, transparent);
+  color: var(--md-sys-color-error);
+}
+
+/* ============================================================
+   AI CHAT
+   ============================================================ */
+.ai-chat-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+}
+
+/* M3 Top App Bar for chat */
+.ai-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  flex-shrink: 0;
+  background-color: var(--md-sys-color-surface-2);
+}
+
+.ai-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background-color: var(--md-sys-color-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.ai-name {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  letter-spacing: var(--md-sys-typescale-title-medium-tracking);
+  color: var(--md-sys-color-on-surface);
+  display: block;
+}
+
+.ai-subtitle {
+  font-size: var(--md-sys-typescale-body-small-size);
+  letter-spacing: var(--md-sys-typescale-body-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  display: block;
+  margin-top: 2px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+}
+
+.bot-message  { align-self: flex-start; }
+.user-message { align-self: flex-end; }
+
+/* M3 Chat bubble */
+.message-bubble {
+  padding: 10px 16px;
+  border-radius: var(--md-sys-shape-corner-large);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+}
+
+.bot-message .message-bubble {
+  background-color: var(--md-sys-color-surface-variant);
+  color: var(--md-sys-color-on-surface);
+  border-bottom-left-radius: var(--md-sys-shape-corner-extra-small);
+}
+
+.user-message .message-bubble {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border-bottom-right-radius: var(--md-sys-shape-corner-extra-small);
+}
+
+.message-bubble p { margin-bottom: 6px; }
+.message-bubble p:last-child { margin-bottom: 0; }
+.message-bubble ul { padding-left: 16px; }
+.message-bubble li { margin-bottom: 4px; }
+
+.message-time {
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+.bot-message .message-time  { align-self: flex-start; }
+.user-message .message-time { align-self: flex-end; }
+
+/* M3 Suggestion Chips */
+.scenario-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* M3 Assist Chip */
+.chip {
+  padding: 6px 16px;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: transparent;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color var(--duration-short4) var(--motion-standard),
+    color var(--duration-short4) var(--motion-standard);
+}
+
+.chip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-short2);
+}
+
+.chip:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
+
+.chip:hover::after  { opacity: var(--md-sys-state-hover-opacity); }
+.chip:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+
+/* Chat input area */
+.chat-input-area {
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  padding: 12px 16px;
+  flex-shrink: 0;
+  background-color: var(--md-sys-color-surface-2);
+}
+
+/* M3 Filled tonal badge */
+.api-key-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--md-sys-color-warning-container);
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: 8px 16px;
+  margin-bottom: 10px;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-on-warning-container);
+}
+
+.api-key-notice.hidden { display: none; }
+
+.link-btn {
+  color: var(--md-sys-color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: var(--md-sys-typescale-label-large-size);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  padding: 0;
+}
+
+.chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* M3 Outlined Text Field */
+.chat-textarea {
+  flex: 1;
+  background-color: var(--md-sys-color-surface-variant);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  padding: 10px 16px;
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  color: var(--md-sys-color-on-surface);
+  resize: none;
+  max-height: 120px;
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  transition: border-color var(--duration-short4) var(--motion-standard);
+}
+
+.chat-textarea::placeholder {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.chat-textarea:focus {
+  border-color: var(--md-sys-color-primary);
+  border-width: 2px;
+  padding: 9px 15px; /* compensate for border width increase */
+  outline: none;
+}
+
+/* M3 FAB (Send button) */
+.send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--md-sys-shape-corner-large);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow var(--duration-short4) var(--motion-standard),
+    transform var(--duration-short2) var(--motion-accel);
+}
+
+.send-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-short2);
+}
+
+.send-btn:hover {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+}
+
+.send-btn:hover::after  { opacity: var(--md-sys-state-hover-opacity); }
+.send-btn:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+.send-btn:active        { transform: scale(0.92); }
+.send-btn:disabled      { opacity: 0.38; cursor: not-allowed; }
+
+/* M3 Typing indicator */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 14px 18px;
+  background-color: var(--md-sys-color-surface-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  border-bottom-left-radius: var(--md-sys-shape-corner-extra-small);
+  align-self: flex-start;
+  width: fit-content;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-on-surface-variant);
+  animation: typing-bounce 1.4s var(--motion-standard) infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.22s; }
+.typing-dot:nth-child(3) { animation-delay: 0.44s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+  30%            { transform: translateY(-7px); opacity: 1; }
+}
+
+/* ============================================================
+   M3 NAVIGATION BAR
+   Height: 80px
+   Active indicator: pill (64×32dp)
+   ============================================================ */
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--nav-height) + var(--safe-bottom));
+  background-color: var(--md-sys-color-surface-2);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 12px;
+  padding-bottom: var(--safe-bottom);
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: color var(--duration-short4) var(--motion-standard);
+  position: relative;
+  padding: 0 4px;
+}
+
+.nav-item.active {
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+/* M3 Active Indicator Pill */
+.nav-icon {
+  font-size: 24px;
+  line-height: 1;
+  width: 64px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--md-sys-shape-corner-full);
+  transition:
+    background-color var(--duration-medium2) var(--motion-standard),
+    transform var(--duration-short2) var(--motion-accel);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity var(--duration-short2);
+}
+
+.nav-item:hover .nav-icon::after  { opacity: var(--md-sys-state-hover-opacity); }
+.nav-item:active .nav-icon::after { opacity: var(--md-sys-state-pressed-opacity); }
+
+.nav-item.active .nav-icon {
+  background-color: var(--md-sys-color-secondary-container);
+}
+
+.nav-item:active .nav-icon { transform: scaleX(0.94); }
+
+/* M3 Nav Label — Label Medium */
+.nav-label {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  transition: font-weight var(--duration-short4) var(--motion-standard);
+  white-space: nowrap;
+}
+
+.nav-item.active .nav-label {
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ============================================================
+   M3 MODAL — Bottom Sheet
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--md-sys-color-scrim) 50%, transparent);
+  display: flex;
+  align-items: flex-end;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-medium2) var(--motion-standard);
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* M3 Modal Bottom Sheet */
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: var(--md-sys-color-surface-2);
+  border-radius: var(--md-sys-shape-corner-extra-large) var(--md-sys-shape-corner-extra-large) 0 0;
+  padding: 16px 24px calc(24px + var(--safe-bottom));
+  transform: translateY(28px);
+  transition: transform var(--duration-medium4) var(--motion-decel);
+}
+
+.modal-overlay.open .modal-sheet {
+  transform: translateY(0);
+}
+
+/* M3 Drag Handle */
+.modal-handle {
+  width: 32px;
+  height: 4px;
+  background-color: var(--md-sys-color-on-surface-variant);
+  opacity: 0.4;
+  border-radius: var(--md-sys-shape-corner-full);
+  margin: 0 auto 24px;
+}
+
+/* M3 Headline Small */
+.modal-title {
+  font-size: var(--md-sys-typescale-headline-small-size);
+  line-height: var(--md-sys-typescale-headline-small-line-height);
+  font-weight: var(--md-sys-typescale-headline-small-weight);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 20px;
+}
+
+/* M3 Body Medium */
+.modal-desc {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 20px;
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+}
+
+/* —— M3 Text Field —— */
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 6px;
+}
+
+/* M3 Filled Text Field */
+.form-input,
+.form-select {
+  width: 100%;
+  background-color: var(--md-sys-color-surface-variant);
+  border: none;
+  border-bottom: 1px solid var(--md-sys-color-on-surface-variant);
+  border-radius: var(--md-sys-shape-corner-extra-small) var(--md-sys-shape-corner-extra-small) 0 0;
+  padding: 16px;
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  color: var(--md-sys-color-on-surface);
+  transition: border-color var(--duration-short4) var(--motion-standard);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-input::placeholder { color: var(--md-sys-color-on-surface-variant); }
+
+.form-input:focus,
+.form-select:focus {
+  border-bottom: 2px solid var(--md-sys-color-primary);
+  padding-bottom: 15px;
+  outline: none;
+}
+
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23C2C7CE' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.form-select option {
+  background: #2a2f3a;
+  color: var(--md-sys-color-on-surface);
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* —— M3 Buttons —— */
+.btn {
+  flex: 1;
+  padding: 10px 24px;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow var(--duration-short4) var(--motion-standard),
+    transform var(--duration-short2) var(--motion-accel);
+  text-align: center;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-short2);
+}
+
+.btn:hover::after  { opacity: var(--md-sys-state-hover-opacity); }
+.btn:active::after { opacity: var(--md-sys-state-pressed-opacity); }
+.btn:active        { transform: scale(0.97); }
+
+/* M3 Filled Button */
+.btn-primary {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
+}
+
+/* M3 Filled Tonal Button */
+.btn-danger {
+  background-color: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+
+/* M3 Outlined Button */
+.btn-secondary {
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/* ============================================================
+   M3 EMPTY STATE
+   ============================================================ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  gap: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 4px;
+  opacity: 0.6;
+}
+
+/* ============================================================
+   M3 SNACKBAR / TOAST
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background-color: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  padding: 14px 16px;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+  white-space: nowrap;
+  z-index: 300;
+  opacity: 0;
+  transition:
+    opacity var(--duration-short4) var(--motion-standard),
+    transform var(--duration-short4) var(--motion-decel);
+  pointer-events: none;
+  box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
+  min-width: 200px;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   DESKTOP NAVIGATION RAIL (M3 NavigationRail)
+   ============================================================ */
+@media (min-width: 768px) {
+  #app {
+    flex-direction: row;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100vh;
+  }
+
+  #app-header { display: none; }
+
+  /* M3 Navigation Rail */
+  #bottom-nav {
+    position: relative;
+    width: 80px; /* compact rail */
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0;
+    padding-top: 44px;
+    background-color: var(--md-sys-color-surface-1);
+    border-right: 0;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  /* FAB in rail top */
+  #bottom-nav::before {
+    content: '💎';
+    display: block;
+    font-size: 28px;
+    margin-bottom: 16px;
+    margin-top: -24px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .nav-item {
+    flex: none;
+    width: 100%;
+    flex-direction: column;
+    padding: 4px 0;
+    gap: 4px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .nav-icon {
+    width: 56px;
+    height: 32px;
+  }
+
+  .nav-item.active .nav-icon {
+    background-color: var(--md-sys-color-secondary-container);
+  }
+
+  .nav-label {
+    font-size: var(--md-sys-typescale-label-medium-size);
+    font-weight: var(--md-sys-typescale-label-medium-weight);
+  }
+
+  .nav-item.active .nav-label {
+    font-weight: 700;
+  }
+
+  #app-content { flex: 1; overflow: hidden; }
+
+  .tab-panel {
+    padding-bottom: 16px;
+  }
+
+  .ai-chat-wrapper { padding-bottom: 0; }
+
+  .modal-overlay { align-items: center; }
+
+  .modal-sheet {
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    max-width: 440px;
+    padding-bottom: 24px;
+  }
+
+  .toast { bottom: 24px; }
+
+  .home-hero {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 32px;
+  }
+
+  .tab-content-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+}
+
+/* Wide desktop — full NavigationRail with labels */
+@media (min-width: 1024px) {
+  #bottom-nav {
+    width: 200px;
+    align-items: flex-start;
+    padding-left: 0;
+  }
+
+  #bottom-nav::before {
+    font-size: 24px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0 16px;
+    gap: 12px;
+    border-radius: 0 var(--md-sys-shape-corner-full) var(--md-sys-shape-corner-full) 0;
+    width: 100%;
+  }
+
+  .nav-icon {
+    width: 56px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .nav-label {
+    font-size: var(--md-sys-typescale-label-large-size);
+    font-weight: var(--md-sys-typescale-label-large-weight);
+  }
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+}

@@ -1,0 +1,338 @@
+/**
+ * app.js — Точка входа (async)
+ * TWA init, обработка форм, ИИ-чат
+ */
+
+// ——— Telegram Web App ———
+const TG = window.Telegram?.WebApp;
+
+function initTelegram() {
+  if (!TG) return;
+  TG.ready();
+  TG.expand();
+
+  // Показываем источник хранилища в консоли
+  console.log(`[ФинПлан] Storage: ${DB.isCloudStorage ? '☁️ Telegram CloudStorage' : '💾 LocalStorage (fallback)'}`);
+
+  TG.BackButton.onClick(() => {
+    const active = document.querySelector('.tab-panel.active');
+    if (active && active.id !== 'tab-home') {
+      switchTab('home', document.getElementById('nav-home'));
+    }
+  });
+}
+
+// ——— Сброс статуса оплаты при смене месяца ———
+async function checkMonthReset() {
+  const now  = new Date();
+  const ym   = `${now.getFullYear()}-${now.getMonth()}`;
+  const last = await DB.Settings.getLastMonth();
+
+  if (last && last !== ym) {
+    await DB.Obligations.resetPaidForNewMonth();
+    showToast('🔄 Новый месяц! Статус оплаты сброшен.');
+  }
+
+  await DB.Settings.setLastMonth(ym);
+}
+
+// ============================================================
+// FORM: ДОХОД
+// ============================================================
+async function submitIncome(e) {
+  e.preventDefault();
+  const amount = parseFloat(document.getElementById('income-amount').value);
+  const source = document.getElementById('income-source').value || 'Поступление';
+
+  if (!amount || amount <= 0) { showToast('⚠️ Введите сумму'); return; }
+
+  await DB.Incomes.add({ amount, source });
+  document.getElementById('form-income').reset();
+  closeModal('modal-income');
+  await renderAll();
+  showToast(`✅ Доход +${fmt(amount)} добавлен`);
+  TG?.HapticFeedback?.notificationOccurred('success');
+}
+
+// ============================================================
+// FORM: РАСХОД
+// ============================================================
+async function submitExpense(e) {
+  e.preventDefault();
+  const amount      = parseFloat(document.getElementById('expense-amount').value);
+  const description = document.getElementById('expense-desc').value || 'Расход';
+
+  if (!amount || amount <= 0) { showToast('⚠️ Введите сумму'); return; }
+
+  await DB.Expenses.add({ amount, description });
+  document.getElementById('form-expense').reset();
+  closeModal('modal-expense');
+  await renderAll();
+  showToast(`📉 Расход −${fmt(amount)} добавлен`);
+  TG?.HapticFeedback?.notificationOccurred('warning');
+}
+
+// ============================================================
+// FORM: ОБЯЗАТЕЛЬСТВО
+// ============================================================
+async function submitObligation(e) {
+  e.preventDefault();
+  const title       = document.getElementById('obl-title').value;
+  const amount      = parseFloat(document.getElementById('obl-amount').value);
+  const due_day     = parseInt(document.getElementById('obl-due-day').value);
+  const criticality = document.getElementById('obl-criticality').value;
+
+  if (!title || !amount || !due_day || !criticality) {
+    showToast('⚠️ Заполните все поля');
+    return;
+  }
+
+  await DB.Obligations.add({ title, amount, due_day, criticality });
+  document.getElementById('form-obligation').reset();
+  closeModal('modal-obligation');
+  await renderAll();
+  showToast(`🔥 Обязательство «${title}» добавлено`);
+  TG?.HapticFeedback?.notificationOccurred('success');
+}
+
+// ============================================================
+// API KEY
+// ============================================================
+async function saveApiKey(e) {
+  e.preventDefault();
+  const key = document.getElementById('api-key-input').value.trim();
+  await DB.Settings.setApiKey(key);
+  closeModal('modal-api-key');
+  updateApiKeyNotice();
+  showToast(key ? '🔑 API-ключ сохранён' : '🔑 API-ключ удалён');
+}
+
+async function updateApiKeyNotice() {
+  const notice = document.getElementById('api-key-notice');
+  const hasKey = !!(await DB.Settings.getApiKey());
+  notice.classList.toggle('hidden', hasKey);
+}
+
+// ============================================================
+// AI CHAT
+// ============================================================
+const chatHistory = [];
+
+function buildSystemPrompt(ctx) {
+  const { balance, obligations, recent_incomes, recent_expenses } = ctx;
+
+  const oblList = obligations.length
+    ? obligations.map(o =>
+        `  • ${o.title}: ${o.amount}₽, ${o.due_day}-го, критичность: ${o.criticality}, оплачено: ${o.is_paid ? 'да' : 'нет'}`
+      ).join('\n')
+    : '  (нет обязательств)';
+
+  const incList = recent_incomes.length
+    ? recent_incomes.map(i =>
+        `  • ${i.source}: +${i.amount}₽ (${new Date(i.created_at).toLocaleDateString('ru-RU')})`
+      ).join('\n')
+    : '  (нет данных)';
+
+  const expList = recent_expenses.length
+    ? recent_expenses.map(e =>
+        `  • ${e.description}: −${e.amount}₽ (${new Date(e.created_at).toLocaleDateString('ru-RU')})`
+      ).join('\n')
+    : '  (нет данных)';
+
+  return `Ты — финансовый советник приложения ФинПлан для предпринимателей с нерегулярным доходом. Общайся по-русски, тон — поддерживающий, мягкий, без паники. Предлагай конкретные выходы.
+
+ТЕКУЩИЙ ФИНАНСОВЫЙ СРЕЗ:
+• Кэш на руках: ${balance.current_cash}₽
+• Заморожено под обязательства: ${balance.frozen_funds}₽
+• Свободный баланс: ${balance.free_balance}₽
+• Безопасный лимит на сегодня: ${balance.today_limit}₽
+
+ОБЯЗАТЕЛЬСТВА:
+${oblList}
+
+ПОСЛЕДНИЕ ДОХОДЫ:
+${incList}
+
+ПОСЛЕДНИЕ РАСХОДЫ:
+${expList}
+
+Отвечай кратко и по делу. Используй цифры из данных. Если спрашивают про конкретную сумму — посчитай, как она повлияет на баланс и обязательства.`;
+}
+
+async function sendMessage() {
+  const input  = document.getElementById('chat-input');
+  const text   = input.value.trim();
+  if (!text) return;
+
+  const apiKey = await DB.Settings.getApiKey();
+  if (!apiKey) { openModal('modal-api-key'); return; }
+
+  appendMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  input.style.height = 'auto';
+
+  const typingEl = appendTyping();
+  const sendBtn  = document.getElementById('chat-send-btn');
+  sendBtn.disabled = true;
+
+  try {
+    const ctx          = await Calculator.buildAIContext();
+    const systemPrompt = buildSystemPrompt(ctx);
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model:       'gpt-4o-mini',
+        messages:    [
+          { role: 'system', content: systemPrompt },
+          ...chatHistory.slice(-10),
+        ],
+        max_tokens:  600,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${response.status}`);
+    }
+
+    const data  = await response.json();
+    const reply = data.choices?.[0]?.message?.content?.trim() || 'Нет ответа от ИИ.';
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    typingEl.remove();
+    appendMessage('bot', reply);
+
+  } catch (err) {
+    typingEl.remove();
+    const msg = err.message.includes('401')
+      ? 'Неверный API-ключ. Проверьте настройки.'
+      : `Ошибка: ${err.message}`;
+    appendMessage('bot', `⚠️ ${msg}`);
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+function sendScenario(btn) {
+  document.getElementById('chat-input').value = btn.dataset.text;
+  sendMessage();
+}
+
+function appendMessage(role, content) {
+  const container = document.getElementById('chat-messages');
+  const isBot     = role === 'bot';
+  const cls       = isBot ? 'bot-message' : 'user-message';
+  const time      = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+  const html = content
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  const div = document.createElement('div');
+  div.className = `chat-message ${cls}`;
+  div.innerHTML = `
+    <div class="message-bubble">${html}</div>
+    <span class="message-time">${time}</span>
+  `;
+
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function appendTyping() {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'typing-indicator';
+  div.innerHTML = `
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function handleChatKey(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ============================================================
+// DEMO DATA (только при первом запуске)
+// ============================================================
+async function seedDemoData() {
+  const today  = new Date().getDate();
+  const credit = today + 2 > 28 ? 1 : today + 2;
+
+  await Promise.all([
+    DB.Incomes.add({ amount: 85000, source: 'Фриланс — Клиент А' }),
+    DB.Incomes.add({ amount: 32000, source: 'Консультация' }),
+    DB.Expenses.add({ amount: 2500,  description: 'Кафе и еда' }),
+    DB.Expenses.add({ amount: 800,   description: 'Подписки' }),
+  ]);
+
+  await Promise.all([
+    DB.Obligations.add({ title: 'Аренда офиса',  amount: 28000, due_day: (today % 28) + 7, criticality: 'Высокая' }),
+    DB.Obligations.add({ title: 'Налог УСН',      amount: 12000, due_day: 25,               criticality: 'Высокая' }),
+    DB.Obligations.add({ title: 'Кредит',         amount: 15000, due_day: credit,            criticality: 'Высокая' }),
+    DB.Obligations.add({ title: 'Adobe Creative', amount: 3200,  due_day: 10,               criticality: 'Средняя' }),
+    DB.Obligations.add({ title: 'Интернет',       amount: 900,   due_day: 20,               criticality: 'Низкая'  }),
+  ]);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Telegram SDK
+  initTelegram();
+
+  // 2. Дата в шапке
+  renderHeaderDate();
+
+  // 3. Проверка смены месяца
+  await checkMonthReset();
+
+  // 4. Проверяем наличие данных → демо при первом запуске
+  const [incomes, obligations] = await Promise.all([
+    DB.Incomes.getAll(),
+    DB.Obligations.getAll(),
+  ]);
+
+  if (!incomes.length && !obligations.length) {
+    await seedDemoData();
+  }
+
+  // 5. Рендер всего приложения
+  await renderAll();
+
+  // 6. API-ключ
+  await updateApiKeyNotice();
+
+  // 7. Подставляем существующий ключ в форму
+  const existingKey = await DB.Settings.getApiKey();
+  if (existingKey) {
+    document.getElementById('api-key-input').value = existingKey;
+  }
+
+  // 8. Индикатор хранилища (только в dev-режиме, вне Telegram)
+  if (!DB.isCloudStorage) {
+    console.warn('[ФинПлан] Telegram не обнаружен — используется LocalStorage как fallback.');
+  }
+});

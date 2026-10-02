@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ФинПлан — Динамическое финансовое планирование</title>
+  <meta name="description" content="Приложение динамического финансового планирования для предпринимателей с нерегулярным доходом. Безопасный лимит на каждый день." />
+
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- PWA / TWA Meta -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1A1C1E" />
+
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Roboto Flex loaded via CSS @import -->
+
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- App Shell -->
+  <div id="app">
+
+    <!-- ========== HEADER ========== -->
+    <header id="app-header">
+      <div class="header-inner">
+        <div class="header-logo">
+          <span class="logo-icon">💎</span>
+          <span class="logo-text">ФинПлан</span>
+        </div>
+        <div class="header-date" id="header-date"></div>
+      </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main id="app-content">
+
+      <!-- TAB: Главная (Светофор) -->
+      <section class="tab-panel active" id="tab-home" role="tabpanel" aria-labelledby="nav-home">
+        <div class="home-hero">
+          <!-- Светофор -->
+          <div class="traffic-light-container">
+            <p class="hero-label">Безопасный лимит на сегодня</p>
+            <div class="traffic-light" id="traffic-light">
+              <div class="tl-glow" id="tl-glow"></div>
+              <div class="tl-amount" id="tl-amount">0 ₽</div>
+              <div class="tl-status" id="tl-status">Загрузка...</div>
+            </div>
+          </div>
+
+          <!-- Метрики -->
+          <div class="metrics-grid">
+            <div class="metric-card" id="metric-cash">
+              <span class="metric-icon">💰</span>
+              <div class="metric-info">
+                <span class="metric-label">Кэш на руках</span>
+                <span class="metric-value" id="metric-cash-val">0 ₽</span>
+              </div>
+            </div>
+            <div class="metric-card" id="metric-frozen">
+              <span class="metric-icon">🔒</span>
+              <div class="metric-info">
+                <span class="metric-label">Заморожено</span>
+                <span class="metric-value" id="metric-frozen-val">0 ₽</span>
+              </div>
+            </div>
+            <div class="metric-card" id="metric-free">
+              <span class="metric-icon">✅</span>
+              <div class="metric-info">
+                <span class="metric-label">Свободно</span>
+                <span class="metric-value" id="metric-free-val">0 ₽</span>
+              </div>
+            </div>
+            <div class="metric-card" id="metric-obligations">
+              <span class="metric-icon">📋</span>
+              <div class="metric-info">
+                <span class="metric-label">Обязательств</span>
+                <span class="metric-value" id="metric-obligations-val">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Быстрые действия -->
+          <div class="quick-actions">
+            <button class="quick-btn btn-income" id="btn-quick-income" onclick="openModal('modal-income')">
+              <span class="btn-icon">⬆️</span>
+              <span>Доход</span>
+            </button>
+            <button class="quick-btn btn-expense" id="btn-quick-expense" onclick="openModal('modal-expense')">
+              <span class="btn-icon">⬇️</span>
+              <span>Расход</span>
+            </button>
+          </div>
+
+          <!-- Ближайшие обязательства -->
+          <div class="upcoming-section">
+            <h2 class="section-title">🔥 Ближайшие обязательства</h2>
+            <div id="upcoming-list" class="upcoming-list">
+              <div class="empty-state">
+                <span>Нет обязательств на ближайшие 7 дней</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Операции -->
+      <section class="tab-panel" id="tab-operations" role="tabpanel" aria-labelledby="nav-operations">
+        <div class="tab-content-inner">
+          <div class="tab-header">
+            <h1 class="tab-title">Операции</h1>
+            <button class="icon-btn" id="btn-add-income-ops" onclick="openModal('modal-income')" title="Добавить доход">+</button>
+          </div>
+          <div class="filter-tabs" role="tablist">
+            <button class="filter-tab active" data-filter="all" onclick="filterOperations('all', this)">Все</button>
+            <button class="filter-tab" data-filter="income" onclick="filterOperations('income', this)">Доходы</button>
+            <button class="filter-tab" data-filter="expense" onclick="filterOperations('expense', this)">Расходы</button>
+          </div>
+          <div id="operations-list" class="transactions-list">
+            <div class="empty-state">
+              <div class="empty-icon">📊</div>
+              <p>Операций пока нет.<br>Добавьте первый доход или расход.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Обязательства -->
+      <section class="tab-panel" id="tab-obligations" role="tabpanel" aria-labelledby="nav-obligations">
+        <div class="tab-content-inner">
+          <div class="tab-header">
+            <h1 class="tab-title">Обязательства</h1>
+            <button class="icon-btn" id="btn-add-obligation" onclick="openModal('modal-obligation')" title="Добавить обязательство">+</button>
+          </div>
+          <div id="obligations-list" class="obligations-list">
+            <div class="empty-state">
+              <div class="empty-icon">🔥</div>
+              <p>Горящих точек нет.<br>Добавьте обязательные расходы.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: ИИ-Советник -->
+      <section class="tab-panel" id="tab-ai" role="tabpanel" aria-labelledby="nav-ai">
+        <div class="ai-chat-wrapper">
+          <div class="ai-chat-header">
+            <div class="ai-avatar">🤖</div>
+            <div class="ai-info">
+              <span class="ai-name">ИИ-Советник</span>
+              <span class="ai-subtitle">Симулятор сценариев «Что, если?»</span>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chat-messages">
+            <!-- Welcome message -->
+            <div class="chat-message bot-message">
+              <div class="message-bubble">
+                <p>Привет! Я ваш финансовый советник. 👋</p>
+                <p>Задайте мне любой вопрос о вашем финансовом положении, например:</p>
+                <ul>
+                  <li>«Хочу купить ноутбук за 50к. Что будет с бюджетом?»</li>
+                  <li>«Поступлений нет, послезавтра кредит 15к. Что делать?»</li>
+                  <li>«Как распределить доход, чтобы не попасть в кассовый разрыв?»</li>
+                </ul>
+              </div>
+              <span class="message-time">сейчас</span>
+            </div>
+
+            <!-- Scenario chips -->
+            <div class="scenario-chips">
+              <button class="chip" onclick="sendScenario(this)" data-text="Хочу купить ноутбук за 50 000 ₽. Как это повлияет на мой бюджет и обязательства?">💻 Крупная покупка</button>
+              <button class="chip" onclick="sendScenario(this)" data-text="У меня нет поступлений, а послезавтра нужно платить кредит. Что делать?">⚠️ Нет поступлений</button>
+              <button class="chip" onclick="sendScenario(this)" data-text="Как оптимально распределить мой свободный баланс, чтобы не было кассового разрыва?">📊 Анализ баланса</button>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <div class="api-key-notice" id="api-key-notice">
+              <span>🔑 Для активации ИИ укажите API-ключ</span>
+              <button onclick="openModal('modal-api-key')" class="link-btn">Настроить</button>
+            </div>
+            <div class="chat-input-row">
+              <textarea
+                id="chat-input"
+                class="chat-textarea"
+                placeholder="Спросите советника..."
+                rows="1"
+                onkeydown="handleChatKey(event)"
+                oninput="autoResize(this)"
+              ></textarea>
+              <button class="send-btn" id="chat-send-btn" onclick="sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ========== BOTTOM NAV (Mobile) ========== -->
+    <nav id="bottom-nav" role="tablist" aria-label="Основная навигация">
+      <button class="nav-item active" id="nav-home" role="tab" aria-selected="true" aria-controls="tab-home" onclick="switchTab('home', this)">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Главная</span>
+      </button>
+      <button class="nav-item" id="nav-operations" role="tab" aria-selected="false" aria-controls="tab-operations" onclick="switchTab('operations', this)">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Операции</span>
+      </button>
+      <button class="nav-item" id="nav-obligations" role="tab" aria-selected="false" aria-controls="tab-obligations" onclick="switchTab('obligations', this)">
+        <span class="nav-icon">🔥</span>
+        <span class="nav-label">Обязательства</span>
+      </button>
+      <button class="nav-item" id="nav-ai" role="tab" aria-selected="false" aria-controls="tab-ai" onclick="switchTab('ai', this)">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-label">ИИ-Советник</span>
+      </button>
+    </nav>
+
+  </div><!-- /#app -->
+
+  <!-- ========== MODALS ========== -->
+
+  <!-- Modal: Add Income -->
+  <div class="modal-overlay" id="modal-income" role="dialog" aria-modal="true" aria-labelledby="modal-income-title" onclick="closeModalOnOverlay(event, 'modal-income')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-income-title">Добавить доход</h2>
+      <form id="form-income" onsubmit="submitIncome(event)">
+        <div class="form-group">
+          <label class="form-label" for="income-amount">Сумма (₽)</label>
+          <input type="number" id="income-amount" class="form-input" placeholder="0" min="0" step="any" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="income-source">Источник</label>
+          <input type="text" id="income-source" class="form-input" placeholder="Например: Клиент, Фриланс, Продажа..." />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-income')">Отмена</button>
+          <button type="submit" class="btn btn-primary">Добавить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Expense -->
+  <div class="modal-overlay" id="modal-expense" role="dialog" aria-modal="true" aria-labelledby="modal-expense-title" onclick="closeModalOnOverlay(event, 'modal-expense')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-expense-title">Добавить расход</h2>
+      <form id="form-expense" onsubmit="submitExpense(event)">
+        <div class="form-group">
+          <label class="form-label" for="expense-amount">Сумма (₽)</label>
+          <input type="number" id="expense-amount" class="form-input" placeholder="0" min="0" step="any" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="expense-desc">Описание</label>
+          <input type="text" id="expense-desc" class="form-input" placeholder="На что потрачено..." />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-expense')">Отмена</button>
+          <button type="submit" class="btn btn-primary btn-danger">Добавить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Obligation -->
+  <div class="modal-overlay" id="modal-obligation" role="dialog" aria-modal="true" aria-labelledby="modal-obligation-title" onclick="closeModalOnOverlay(event, 'modal-obligation')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-obligation-title">Добавить обязательство</h2>
+      <form id="form-obligation" onsubmit="submitObligation(event)">
+        <div class="form-group">
+          <label class="form-label" for="obl-title">Название</label>
+          <input type="text" id="obl-title" class="form-input" placeholder="Аренда, Кредит, Налоги..." required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="obl-amount">Сумма (₽)</label>
+          <input type="number" id="obl-amount" class="form-input" placeholder="0" min="0" step="any" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="obl-due-day">День списания (1–31)</label>
+          <input type="number" id="obl-due-day" class="form-input" placeholder="1" min="1" max="31" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="obl-criticality">Критичность</label>
+          <select id="obl-criticality" class="form-select" required>
+            <option value="">Выберите...</option>
+            <option value="Высокая">🔴 Высокая</option>
+            <option value="Средняя">🟡 Средняя</option>
+            <option value="Низкая">🟢 Низкая</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-obligation')">Отмена</button>
+          <button type="submit" class="btn btn-primary">Добавить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: API Key -->
+  <div class="modal-overlay" id="modal-api-key" role="dialog" aria-modal="true" aria-labelledby="modal-api-key-title" onclick="closeModalOnOverlay(event, 'modal-api-key')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-api-key-title">🔑 Настройка ИИ</h2>
+      <p class="modal-desc">Укажите OpenAI API-ключ для активации ИИ-Советника. Ключ хранится только локально.</p>
+      <form id="form-api-key" onsubmit="saveApiKey(event)">
+        <div class="form-group">
+          <label class="form-label" for="api-key-input">OpenAI API Key</label>
+          <input type="password" id="api-key-input" class="form-input" placeholder="sk-..." />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-api-key')">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/db.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
