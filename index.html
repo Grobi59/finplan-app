@@ -33,6 +33,7 @@
         <div class="header-logo">
           <span class="logo-icon">💎</span>
           <span class="logo-text">ФинПлан</span>
+          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v13</span>
         </div>
         <div class="header-date">
           <span id="header-date-text"></span>
@@ -155,10 +156,11 @@
         <div class="ai-chat-wrapper">
           <div class="ai-chat-header">
             <div class="ai-avatar">🤖</div>
-            <div class="ai-info">
+            <div class="ai-info" style="flex: 1;">
               <span class="ai-name">ИИ-Советник</span>
               <span class="ai-subtitle">Симулятор сценариев «Что, если?»</span>
             </div>
+            <button onclick="openModal('modal-api-key')" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--md-sys-color-on-surface-variant);" title="Настройки ИИ">⚙️</button>
           </div>
 
           <div class="chat-messages" id="chat-messages">
@@ -348,10 +350,10 @@
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/db.js?v=12"></script>
-  <script src="js/calculator.js?v=12"></script>
-  <script src="js/ui.js?v=12"></script>
-  <script src="js/app.js?v=12"></script>
+  <script src="js/db.js?v=13"></script>
+  <script src="js/calculator.js?v=13"></script>
+  <script src="js/ui.js?v=13"></script>
+  <script src="js/app.js?v=13"></script>
 
 </body>
 </html>
