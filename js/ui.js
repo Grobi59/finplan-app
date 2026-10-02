@@ -23,7 +23,7 @@ function fmtDate(isoString) {
 
 // ——— Header date ———
 function renderHeaderDate() {
-  const el = document.getElementById('header-date');
+  const el = document.getElementById('header-date-text');
   if (!el) return;
   
   const dateStr = new Date().toLocaleDateString('ru-RU', {
@@ -34,6 +34,12 @@ function renderHeaderDate() {
   
   const icon = DB.isCloudStorage ? '☁️' : '📱';
   el.textContent = `${icon} ${dateStr}`;
+}
+
+async function forceSync() {
+  showToast('🔄 Синхронизация с облаком...');
+  await renderAll();
+  showToast('✅ Данные обновлены');
 }
 
 // ——— Animated counter ———
