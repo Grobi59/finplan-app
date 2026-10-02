@@ -25,11 +25,15 @@ function fmtDate(isoString) {
 function renderHeaderDate() {
   const el = document.getElementById('header-date');
   if (!el) return;
-  el.textContent = new Date().toLocaleDateString('ru-RU', {
+  
+  const dateStr = new Date().toLocaleDateString('ru-RU', {
     weekday: 'short',
     day:     'numeric',
     month:   'long',
   });
+  
+  const icon = DB.isCloudStorage ? '☁️' : '📱';
+  el.textContent = `${icon} ${dateStr}`;
 }
 
 // ——— Animated counter ———

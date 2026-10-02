@@ -42,7 +42,7 @@ const DB = (() => {
             console.warn(`[DB] CloudStorage get timeout for ${key}, fallback to localStorage`);
             resolve(localStorage.getItem(key));
           }
-        }, 1000);
+        }, 5000);
 
         try {
           CS.getItem(key, (err, value) => {
@@ -75,7 +75,7 @@ const DB = (() => {
             answered = true;
             resolve(true); // already saved locally
           }
-        }, 1000);
+        }, 5000);
 
         try {
           CS.setItem(key, value, (err, success) => {
@@ -106,7 +106,7 @@ const DB = (() => {
             answered = true;
             resolve();
           }
-        }, 1000);
+        }, 5000);
 
         try {
           CS.removeItem(key, (err, success) => {
