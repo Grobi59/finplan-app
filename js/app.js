@@ -233,37 +233,45 @@ async function sendMessage() {
         parts: [{ text: m.content }]
       }));
       
-      // Согласно подсказке от API Google в 2026 году, актуальная модель — gemini-3.8-flash
-      const modelId = 'gemini-3.8-flash';
-      
-      // Очищаем ключ от случайно скопированных невидимых символов и кириллицы
       const cleanGeminiKey = geminiKey.replace(/[^\x20-\x7E]/g, '');
+      const fallbackModels = ['gemini-3.8-flash', 'gemini-3.8-pro', 'gemini-1.5-pro-latest', 'gemini-pro'];
       
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-goog-api-key': cleanGeminiKey 
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemPrompt }]
-          },
-          contents: geminiHistory,
-          generationConfig: {
-            maxOutputTokens: 600,
-            temperature: 0.7,
+      let success = false;
+      let lastErr = null;
+      
+      for (const modelId of fallbackModels) {
+        if (success) break;
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'x-goog-api-key': cleanGeminiKey 
+            },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              contents: geminiHistory,
+              generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
+            })
+          });
+          
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${response.status}`);
           }
-        })
-      });
-      
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error?.message || `HTTP ${response.status}`);
+          
+          const data = await response.json();
+          reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          if (reply) success = true;
+        } catch (err) {
+          console.warn(`[Gemini API] Модель ${modelId} недоступна:`, err.message);
+          lastErr = err;
+        }
       }
       
-      const data = await response.json();
-      reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Нет ответа от ИИ.';
+      if (!success) {
+        throw new Error(lastErr?.message || 'Все модели перегружены. Попробуйте позже.');
+      }
     }
 
     chatHistory.push({ role: 'assistant', content: reply });
