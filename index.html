@@ -113,6 +113,16 @@
               </div>
             </div>
           </div>
+
+          <!-- Ожидаемые поступления -->
+          <div class="upcoming-section" style="margin-top: 24px;">
+            <h2 class="section-title">⏳ Ожидаемые поступления</h2>
+            <div id="upcoming-planned-list" class="upcoming-list">
+              <div class="empty-state">
+                <span>Нет ожидаемых поступлений на ближайшие 7 дней</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -121,7 +131,10 @@
         <div class="tab-content-inner">
           <div class="tab-header">
             <h1 class="tab-title">Операции</h1>
-            <button class="icon-btn" id="btn-add-income-ops" onclick="openAddIncome()" title="Добавить доход">+</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="icon-btn" id="btn-add-income-ops" onclick="openAddIncome()" title="Добавить доход">⬆️</button>
+              <button class="icon-btn" id="btn-add-expense-ops" onclick="openAddExpense()" title="Добавить расход" style="background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">⬇️</button>
+            </div>
           </div>
           <div class="filter-tabs" role="tablist">
             <button class="filter-tab active" data-filter="all" onclick="filterOperations('all', this)">Все</button>

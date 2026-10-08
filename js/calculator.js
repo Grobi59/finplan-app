@@ -136,10 +136,23 @@ const Calculator = (() => {
     };
   }
 
+  /**
+   * Ожидаемые поступления в ближайшие N дней.
+   * Возвращает Promise<Array>
+   */
+  async function getUpcomingPlannedIncomes(days = 7) {
+    const planned = await DB.PlannedIncomes.getAll();
+    return planned
+      .filter(p => !p.is_received && daysUntilDueDay(p.expected_day) <= days)
+      .map(p => ({ ...p, days_left: daysUntilDueDay(p.expected_day) }))
+      .sort((a, b) => a.days_left - b.days_left);
+  }
+
   return {
     compute,
     getStatus,
     getUpcomingObligations,
+    getUpcomingPlannedIncomes,
     buildAIContext,
     daysUntilDueDay,
     HORIZON_DAYS,

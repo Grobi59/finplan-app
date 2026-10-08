@@ -120,15 +120,72 @@ async function renderUpcoming() {
                      obl.days_left === 1 ? 'Завтра' :
                      `Через ${obl.days_left} дн.`;
     return `
-      <div class="upcoming-item ${cls}">
-        <div class="crit-dot"></div>
-        <span class="upcoming-title">${escHtml(obl.title)}</span>
-        <div class="upcoming-meta">
-          <span class="upcoming-amount">${fmt(obl.amount)}</span>
-          <span class="upcoming-day">${dayLabel}</span>
+      <div class="upcoming-item ${cls}" style="position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--md-sys-color-surface-2);">
+        <div class="crit-dot" style="position: static;"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div class="upcoming-title" style="margin: 0 0 4px 0; font-size: 15px;">${escHtml(obl.title)}</div>
+          <div class="upcoming-meta" style="margin: 0; justify-content: flex-start; gap: 8px; flex-direction: row; align-items: center;">
+            <span class="upcoming-amount">${fmt(obl.amount)}</span>
+            <span class="upcoming-day">${dayLabel}</span>
+          </div>
         </div>
+        <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); toggleUpcomingObligation('${obl.id}', '${escHtml(obl.title)}', ${obl.amount})" title="Отметить оплаченным" style="padding: 8px; font-size: 20px;">✅</button>
       </div>`;
   }).join('');
+}
+
+async function toggleUpcomingObligation(id, title, amount) {
+  await DB.Obligations.togglePaid(id);
+  if (confirm(`Обязательство «${title}» оплачено.\n\nДобавить расход на сумму ${fmt(amount)} прямо сейчас, чтобы баланс сошелся?`)) {
+    await DB.Expenses.add({ amount: amount, description: title });
+    showToast('Расход добавлен, обязательство оплачено');
+  } else {
+    showToast('Обязательство оплачено');
+  }
+  await renderAll();
+}
+
+async function renderUpcomingPlanned() {
+  const container = document.getElementById('upcoming-planned-list');
+  if (!container) return;
+  const items = await Calculator.getUpcomingPlannedIncomes(7);
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span>Нет ожидаемых поступлений на ближайшие 7 дней</span>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = items.map(obl => {
+    const dayLabel = obl.days_left === 0 ? 'Сегодня!' :
+                     obl.days_left === 1 ? 'Завтра' :
+                     `Через ${obl.days_left} дн.`;
+    return `
+      <div class="upcoming-item medium" style="position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--md-sys-color-surface-2);">
+        <div class="crit-dot" style="position: static; background: var(--md-sys-color-tertiary);"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div class="upcoming-title" style="margin: 0 0 4px 0; font-size: 15px;">${escHtml(obl.source)}</div>
+          <div class="upcoming-meta" style="margin: 0; justify-content: flex-start; gap: 8px; flex-direction: row; align-items: center;">
+            <span class="upcoming-amount" style="color: var(--md-sys-color-tertiary);">+${fmt(obl.amount)}</span>
+            <span class="upcoming-day">${dayLabel}</span>
+          </div>
+        </div>
+        <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); toggleUpcomingPlanned('${obl.id}', '${escHtml(obl.source)}', ${obl.amount})" title="Отметить полученным" style="padding: 8px; font-size: 20px;">✅</button>
+      </div>`;
+  }).join('');
+}
+
+async function toggleUpcomingPlanned(id, source, amount) {
+  await DB.PlannedIncomes.toggleReceived(id);
+  if (confirm(`Поступление «${source}» получено.\n\nДобавить доход на сумму ${fmt(amount)} прямо сейчас, чтобы баланс обновился?`)) {
+    await DB.Incomes.add({ amount: amount, source: source });
+    showToast('Доход добавлен, поступление получено');
+  } else {
+    showToast('Поступление отмечено полученным');
+  }
+  await renderAll();
 }
 
 // ============================================================
@@ -390,6 +447,7 @@ async function renderAll() {
   await Promise.all([
     renderTrafficLight(),
     renderUpcoming(),
+    renderUpcomingPlanned(),
     renderOperations(),
     renderObligations(),
     renderPlanned(),
