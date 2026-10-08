@@ -268,7 +268,7 @@ async function sendMessage() {
             { role: 'system', content: systemPrompt },
             ...chatHistory.slice(-10),
           ],
-          max_tokens:  600,
+          max_tokens:  2000,
           temperature: 0.7,
         }),
       });
@@ -307,7 +307,7 @@ async function sendMessage() {
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: systemPrompt }] },
               contents: geminiHistory,
-              generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
+              generationConfig: { maxOutputTokens: 2000, temperature: 0.7 }
             })
           });
           

@@ -132,8 +132,12 @@
           <div class="tab-header">
             <h1 class="tab-title">Операции</h1>
             <div style="display: flex; gap: 8px;">
-              <button class="icon-btn" id="btn-add-income-ops" onclick="openAddIncome()" title="Добавить доход">⬆️</button>
-              <button class="icon-btn" id="btn-add-expense-ops" onclick="openAddExpense()" title="Добавить расход" style="background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">⬇️</button>
+              <button class="icon-btn" id="btn-add-income-ops" onclick="openAddIncome()" title="Добавить доход">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              </button>
+              <button class="icon-btn" id="btn-add-expense-ops" onclick="openAddExpense()" title="Добавить расход" style="background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </button>
             </div>
           </div>
           <div class="filter-tabs" role="tablist">
@@ -306,9 +310,12 @@
           <label class="form-label" for="income-source">Источник</label>
           <input type="text" id="income-source" class="form-input" placeholder="Например: Клиент, Фриланс, Продажа..." />
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-income')">Отмена</button>
-          <button type="submit" class="btn btn-primary">Добавить</button>
+        <div class="form-actions" style="justify-content: space-between;">
+          <button type="button" class="btn btn-secondary" id="btn-delete-income" onclick="deleteFromModal('income')" style="display:none; color: var(--md-sys-color-error); background: transparent; padding: 0 12px;">Удалить</button>
+          <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-income')">Отмена</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-income">Добавить</button>
+          </div>
         </div>
       </form>
     </div>
@@ -329,9 +336,12 @@
           <label class="form-label" for="expense-desc">Описание</label>
           <input type="text" id="expense-desc" class="form-input" placeholder="На что потрачено..." />
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-expense')">Отмена</button>
-          <button type="submit" class="btn btn-primary btn-danger">Добавить</button>
+        <div class="form-actions" style="justify-content: space-between;">
+          <button type="button" class="btn btn-secondary" id="btn-delete-expense" onclick="deleteFromModal('expense')" style="display:none; color: var(--md-sys-color-error); background: transparent; padding: 0 12px;">Удалить</button>
+          <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-expense')">Отмена</button>
+            <button type="submit" class="btn btn-primary btn-danger" id="btn-submit-expense">Добавить</button>
+          </div>
         </div>
       </form>
     </div>
@@ -365,9 +375,12 @@
             <option value="Низкая">🟢 Низкая</option>
           </select>
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-obligation')">Отмена</button>
-          <button type="submit" class="btn btn-primary">Добавить</button>
+        <div class="form-actions" style="justify-content: space-between;">
+          <button type="button" class="btn btn-secondary" id="btn-delete-obligation" onclick="deleteFromModal('obligation')" style="display:none; color: var(--md-sys-color-error); background: transparent; padding: 0 12px;">Удалить</button>
+          <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-obligation')">Отмена</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-obligation">Добавить</button>
+          </div>
         </div>
       </form>
     </div>
@@ -392,9 +405,12 @@
           <label class="form-label" for="planned-day">Ожидается (день месяца)</label>
           <input type="number" id="planned-day" class="form-input" placeholder="1" min="1" max="31" required />
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-planned')">Отмена</button>
-          <button type="submit" class="btn btn-primary">Добавить</button>
+        <div class="form-actions" style="justify-content: space-between;">
+          <button type="button" class="btn btn-secondary" id="btn-delete-planned" onclick="deleteFromModal('planned')" style="display:none; color: var(--md-sys-color-error); background: transparent; padding: 0 12px;">Удалить</button>
+          <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-planned')">Отмена</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-planned">Добавить</button>
+          </div>
         </div>
       </form>
     </div>

@@ -234,7 +234,6 @@ async function renderOperations(filter = _currentFilter) {
           <div class="tx-date">${fmtDate(tx.created_at)}</div>
         </div>
         <div class="tx-amount ${cls}">${sign}${fmt(tx.amount)}</div>
-        <button class="tx-delete" onclick="event.stopPropagation(); deleteTx('${tx.type}','${tx.id}')" title="Удалить">✕</button>
       </div>`;
   }).join('');
 }
@@ -292,7 +291,6 @@ async function renderObligations() {
           <div class="obl-amount">${fmt(obl.amount)}</div>
           <div class="obl-actions">
             <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); toggleObligation('${obl.id}')" title="${paidTitle}">${paidIcon}</button>
-            <button class="obl-check-btn delete-btn" onclick="event.stopPropagation(); deleteObligation('${obl.id}')" title="Удалить">✕</button>
           </div>
         </div>
       </div>`;
@@ -347,7 +345,6 @@ async function renderPlanned() {
           <div class="obl-amount" style="color: var(--md-sys-color-tertiary)">+${fmt(obl.amount)}</div>
           <div class="obl-actions">
             <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); togglePlanned('${obl.id}')" title="${paidTitle}">${paidIcon}</button>
-            <button class="obl-check-btn delete-btn" onclick="event.stopPropagation(); deletePlanned('${obl.id}')" title="Удалить">✕</button>
           </div>
         </div>
       </div>`;
@@ -472,11 +469,12 @@ function closeModalOnOverlay(event, id) {
   if (event.target === document.getElementById(id)) closeModal(id);
 }
 
-// —— ADD & EDIT MODAL HELPERS ——
 function openAddObligation() {
   document.getElementById('form-obligation').reset();
   document.getElementById('obl-id').value = '';
   document.getElementById('modal-obligation-title').textContent = 'Добавить обязательство';
+  document.getElementById('btn-delete-obligation').style.display = 'none';
+  document.getElementById('btn-submit-obligation').textContent = 'Добавить';
   openModal('modal-obligation');
 }
 
@@ -491,6 +489,8 @@ async function editObligation(id) {
   document.getElementById('obl-due-day').value = obl.due_day;
   document.getElementById('obl-criticality').value = obl.criticality;
   document.getElementById('modal-obligation-title').textContent = 'Редактировать обязательство';
+  document.getElementById('btn-delete-obligation').style.display = 'block';
+  document.getElementById('btn-submit-obligation').textContent = 'Сохранить';
   openModal('modal-obligation');
 }
 
@@ -498,6 +498,8 @@ function openAddIncome() {
   document.getElementById('form-income').reset();
   document.getElementById('income-id').value = '';
   document.getElementById('modal-income-title').textContent = 'Добавить доход';
+  document.getElementById('btn-delete-income').style.display = 'none';
+  document.getElementById('btn-submit-income').textContent = 'Добавить';
   openModal('modal-income');
 }
 
@@ -510,6 +512,8 @@ async function editIncome(id) {
   document.getElementById('income-amount').value = inc.amount;
   document.getElementById('income-source').value = inc.source;
   document.getElementById('modal-income-title').textContent = 'Редактировать доход';
+  document.getElementById('btn-delete-income').style.display = 'block';
+  document.getElementById('btn-submit-income').textContent = 'Сохранить';
   openModal('modal-income');
 }
 
@@ -517,6 +521,8 @@ function openAddExpense() {
   document.getElementById('form-expense').reset();
   document.getElementById('expense-id').value = '';
   document.getElementById('modal-expense-title').textContent = 'Добавить расход';
+  document.getElementById('btn-delete-expense').style.display = 'none';
+  document.getElementById('btn-submit-expense').textContent = 'Добавить';
   openModal('modal-expense');
 }
 
@@ -529,6 +535,8 @@ async function editExpense(id) {
   document.getElementById('expense-amount').value = exp.amount;
   document.getElementById('expense-desc').value = exp.description;
   document.getElementById('modal-expense-title').textContent = 'Редактировать расход';
+  document.getElementById('btn-delete-expense').style.display = 'block';
+  document.getElementById('btn-submit-expense').textContent = 'Сохранить';
   openModal('modal-expense');
 }
 
@@ -536,6 +544,8 @@ function openAddPlanned() {
   document.getElementById('form-planned').reset();
   document.getElementById('planned-id').value = '';
   document.getElementById('modal-planned-title').textContent = 'Добавить ожидание';
+  document.getElementById('btn-delete-planned').style.display = 'none';
+  document.getElementById('btn-submit-planned').textContent = 'Добавить';
   openModal('modal-planned');
 }
 
@@ -549,7 +559,29 @@ async function editPlanned(id) {
   document.getElementById('planned-amount').value = obl.amount;
   document.getElementById('planned-day').value = obl.expected_day;
   document.getElementById('modal-planned-title').textContent = 'Редактировать ожидание';
+  document.getElementById('btn-delete-planned').style.display = 'block';
+  document.getElementById('btn-submit-planned').textContent = 'Сохранить';
   openModal('modal-planned');
+}
+
+async function deleteFromModal(type) {
+  let id;
+  if (type === 'income') id = document.getElementById('income-id').value;
+  if (type === 'expense') id = document.getElementById('expense-id').value;
+  if (type === 'obligation') id = document.getElementById('obl-id').value;
+  if (type === 'planned') id = document.getElementById('planned-id').value;
+  
+  if (!id) return;
+  if (confirm('Удалить эту запись?')) {
+    if (type === 'income' || type === 'expense') {
+      await deleteTx(type, id);
+    } else if (type === 'obligation') {
+      await deleteObligation(id);
+    } else if (type === 'planned') {
+      await deletePlanned(id);
+    }
+    closeModal('modal-' + type);
+  }
 }
 
 // ============================================================
