@@ -102,12 +102,12 @@ async function renderTrafficLight() {
 // ============================================================
 async function renderUpcoming() {
   const container = document.getElementById('upcoming-list');
-  const items     = await Calculator.getUpcomingObligations(7);
+  const items     = await Calculator.getUpcomingObligations(14);
 
   if (!items.length) {
     container.innerHTML = `
       <div class="empty-state">
-        <span>Нет обязательств на ближайшие 7 дней 🎉</span>
+        <span>Нет обязательств на ближайшие 14 дней 🎉</span>
       </div>`;
     return;
   }
