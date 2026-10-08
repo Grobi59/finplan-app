@@ -42,7 +42,8 @@ async function checkMonthReset() {
 async function submitIncome(e) {
   e.preventDefault();
   const id     = document.getElementById('income-id')?.value;
-  const amount = parseFloat(document.getElementById('income-amount').value);
+  const amountStr = document.getElementById('income-amount').value.replace(/\\s/g, '').replace(',', '.');
+  const amount = parseFloat(amountStr);
   const source = document.getElementById('income-source').value || 'Поступление';
 
   if (!amount || amount <= 0) { showToast('⚠️ Введите сумму'); return; }
@@ -67,7 +68,8 @@ async function submitIncome(e) {
 async function submitExpense(e) {
   e.preventDefault();
   const id          = document.getElementById('expense-id')?.value;
-  const amount      = parseFloat(document.getElementById('expense-amount').value);
+  const amountStr = document.getElementById('expense-amount').value.replace(/\\s/g, '').replace(',', '.');
+  const amount      = parseFloat(amountStr);
   const description = document.getElementById('expense-desc').value || 'Расход';
 
   if (!amount || amount <= 0) { showToast('⚠️ Введите сумму'); return; }
@@ -93,7 +95,8 @@ async function submitObligation(e) {
   e.preventDefault();
   const id          = document.getElementById('obl-id')?.value;
   const title       = document.getElementById('obl-title').value;
-  const amount      = parseFloat(document.getElementById('obl-amount').value);
+  const amountStr   = document.getElementById('obl-amount').value.replace(/\\s/g, '').replace(',', '.');
+  const amount      = parseFloat(amountStr);
   const due_day     = parseInt(document.getElementById('obl-due-day').value);
   const criticality = document.getElementById('obl-criticality').value;
 
@@ -123,7 +126,8 @@ async function submitPlanned(e) {
   e.preventDefault();
   const id          = document.getElementById('planned-id')?.value;
   const source      = document.getElementById('planned-source').value;
-  const amount      = parseFloat(document.getElementById('planned-amount').value);
+  const amountStr   = document.getElementById('planned-amount').value.replace(/\\s/g, '').replace(',', '.');
+  const amount      = parseFloat(amountStr);
   const expected_day = parseInt(document.getElementById('planned-day').value);
 
   if (!source || !amount || !expected_day) {
