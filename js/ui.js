@@ -624,6 +624,7 @@ async function editCredit(id) {
   document.getElementById('credit-type').value = cr.type;
   document.getElementById('credit-debt').value = cr.current_debt;
   document.getElementById('credit-limit').value = cr.limit || 0;
+  document.getElementById('credit-min-payment').value = cr.min_payment || 0;
   document.getElementById('credit-rate').value = cr.interest_rate;
   document.getElementById('credit-due-day').value = cr.due_day;
   
@@ -633,9 +634,17 @@ async function editCredit(id) {
   openModal('modal-credit');
 }
 
-function openPayCredit(id) {
+async function openPayCredit(id) {
   document.getElementById('form-pay-credit').reset();
   document.getElementById('pay-credit-id').value = id;
+  
+  // Автоматически подставляем минимальный платеж, если он есть
+  const credits = await DB.Credits.getAll();
+  const cr = credits.find(o => o.id === id);
+  if (cr && cr.min_payment) {
+    document.getElementById('pay-credit-amount').value = cr.min_payment;
+  }
+  
   openModal('modal-pay-credit');
 }
 

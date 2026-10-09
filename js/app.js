@@ -224,20 +224,22 @@ async function submitCredit(e) {
   const current_debt = parseFloat(debtStr);
   const limitStr    = document.getElementById('credit-limit').value.replace(/\\s/g, '').replace(',', '.');
   const limit       = parseFloat(limitStr) || 0;
+  const minPayStr   = document.getElementById('credit-min-payment').value.replace(/\\s/g, '').replace(',', '.');
+  const min_payment = parseFloat(minPayStr) || 0;
   const rateStr     = document.getElementById('credit-rate').value.replace(/\\s/g, '').replace(',', '.');
   const interest_rate = parseFloat(rateStr) || 0;
   const due_day     = parseInt(document.getElementById('credit-due-day').value);
 
-  if (!title || current_debt === undefined || !due_day) {
+  if (!title || isNaN(current_debt) || !due_day) {
     showToast('⚠️ Заполните основные поля');
     return;
   }
 
   if (id) {
-    await DB.Credits.update(id, { title, type, current_debt, limit, interest_rate, due_day });
+    await DB.Credits.update(id, { title, type, current_debt, limit, min_payment, interest_rate, due_day });
     showToast(`💳 Кредит «${title}» обновлен`);
   } else {
-    await DB.Credits.add({ title, type, current_debt, limit, interest_rate, due_day });
+    await DB.Credits.add({ title, type, current_debt, limit, min_payment, interest_rate, due_day });
     showToast(`💳 Кредит «${title}» добавлен`);
   }
 

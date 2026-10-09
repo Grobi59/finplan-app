@@ -174,7 +174,7 @@ const DB = (() => {
     async _save(arr) {
       return Settings.set({ credits: arr });
     },
-    async add({ title, type, current_debt, limit, interest_rate, due_day }) {
+    async add({ title, type, current_debt, limit, min_payment, interest_rate, due_day }) {
       const items = await this.getAll();
       const item = {
         id: genId(),
@@ -182,6 +182,7 @@ const DB = (() => {
         type: String(type || 'credit'), // 'credit' или 'card'
         current_debt: parseFloat(current_debt) || 0,
         limit: parseFloat(limit) || 0,
+        min_payment: parseFloat(min_payment) || 0,
         interest_rate: parseFloat(interest_rate) || 0,
         due_day: parseInt(due_day) || 1,
         created_at: new Date().toISOString(),
@@ -375,6 +376,7 @@ const DB = (() => {
     Expenses,
     PlannedIncomes,
     Settings,
+    Credits,
     genId,
     // Передаем статус Supabase для отображения в UI
     isCloudStorage: true, 
