@@ -114,7 +114,7 @@ const DB = (() => {
   // ========================================================
   const Obligations = {
     async getAll() { return loadArray(COLS.OBLIGATIONS); },
-    async add({ title, amount, due_day, criticality }) {
+    async add({ title, amount, due_day, criticality, is_recurring }) {
       const items = await this.getAll();
       const item = {
         id:          genId(),
@@ -123,6 +123,7 @@ const DB = (() => {
         due_day:     parseInt(due_day)  || 1,
         criticality: criticality || 'Средняя',
         is_paid:     false,
+        is_recurring: is_recurring !== undefined ? is_recurring : true,
         created_at:  new Date().toISOString(),
       };
       items.push(item);
@@ -152,9 +153,57 @@ const DB = (() => {
       return null;
     },
     async resetPaidForNewMonth() {
-      const items = (await this.getAll()).map(x => ({ ...x, is_paid: false }));
+      let items = await this.getAll();
+      // Удаляем единоразовые обязательства, если они были оплачены
+      items = items.filter(x => !(x.is_paid && x.is_recurring === false));
+      // Сбрасываем статус оплаты для оставшихся (регулярных и неоплаченных единоразовых)
+      items = items.map(x => ({ ...x, is_paid: false }));
       return saveArray(COLS.OBLIGATIONS, items);
     },
+  };
+
+  // ========================================================
+  // CREDITS («Кредиты и карты»)
+  // Хранятся внутри settings
+  // ========================================================
+  const Credits = {
+    async getAll() {
+      const s = await Settings.get();
+      return s.credits || [];
+    },
+    async _save(arr) {
+      return Settings.set({ credits: arr });
+    },
+    async add({ title, type, current_debt, limit, interest_rate, due_day }) {
+      const items = await this.getAll();
+      const item = {
+        id: genId(),
+        title: String(title || 'Кредит').trim(),
+        type: String(type || 'credit'), // 'credit' или 'card'
+        current_debt: parseFloat(current_debt) || 0,
+        limit: parseFloat(limit) || 0,
+        interest_rate: parseFloat(interest_rate) || 0,
+        due_day: parseInt(due_day) || 1,
+        created_at: new Date().toISOString(),
+      };
+      items.push(item);
+      await this._save(items);
+      return item;
+    },
+    async remove(id) {
+      const items = (await this.getAll()).filter(x => x.id !== id);
+      return this._save(items);
+    },
+    async update(id, data) {
+      const items = await this.getAll();
+      const idx = items.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        items[idx] = { ...items[idx], ...data };
+        await this._save(items);
+        return items[idx];
+      }
+      return null;
+    }
   };
 
   // ========================================================

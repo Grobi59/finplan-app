@@ -310,6 +310,46 @@ async function deleteObligation(id) {
 }
 
 // ============================================================
+// CREDITS
+// ============================================================
+async function renderCredits() {
+  const container = document.getElementById('credits-list');
+  const credits = (await DB.Credits.getAll()).sort((a, b) => a.due_day - b.due_day);
+
+  if (!credits.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>Нет активных кредитов.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = credits.map(cr => {
+    const isCard = cr.type === 'card';
+    const typeLabel = isCard ? '💳 Кредитка' : '🏦 Кредит';
+    const daysLeft = Calculator.daysUntilDueDay(cr.due_day);
+    const dayLabel = daysLeft === 0 ? 'Сегодня выписка' :
+                     daysLeft === 1 ? 'Завтра выписка' :
+                     `${cr.due_day}-го числа (через ${daysLeft} дн.)`;
+                     
+    return `
+      <div class="obligation-item medium" id="cr-${cr.id}" style="cursor:pointer;" onclick="editCredit('${cr.id}')">
+        <div class="obl-crit" style="background: var(--md-sys-color-secondary)"></div>
+        <div class="obl-info">
+          <div class="obl-title">${escHtml(cr.title)}</div>
+          <div class="obl-meta">${typeLabel} · ${cr.interest_rate}% · ${dayLabel}</div>
+        </div>
+        <div class="obl-right">
+          <div class="obl-amount" style="color: var(--md-sys-color-error)">−${fmt(cr.current_debt)}</div>
+          <div class="obl-actions">
+            <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); openPayCredit('${cr.id}')" style="font-size: 14px; padding: 4px 12px; width: auto; border-radius: 8px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);">Оплатить</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ============================================================
 // PLANNED INCOMES
 // ============================================================
 async function renderPlanned() {
@@ -447,6 +487,7 @@ async function renderAll() {
     renderUpcomingPlanned(),
     renderOperations(),
     renderObligations(),
+    renderCredits(),
     renderPlanned(),
     renderAnalytics()
   ]);
@@ -564,12 +605,47 @@ async function editPlanned(id) {
   openModal('modal-planned');
 }
 
+function openAddCredit() {
+  document.getElementById('form-credit').reset();
+  document.getElementById('credit-id').value = '';
+  document.getElementById('modal-credit-title').textContent = 'Добавить кредит/карту';
+  document.getElementById('btn-delete-credit').style.display = 'none';
+  document.getElementById('btn-submit-credit').textContent = 'Добавить';
+  openModal('modal-credit');
+}
+
+async function editCredit(id) {
+  const credits = await DB.Credits.getAll();
+  const cr = credits.find(o => o.id === id);
+  if (!cr) return;
+  document.getElementById('form-credit').reset();
+  document.getElementById('credit-id').value = cr.id;
+  document.getElementById('credit-title').value = cr.title;
+  document.getElementById('credit-type').value = cr.type;
+  document.getElementById('credit-debt').value = cr.current_debt;
+  document.getElementById('credit-limit').value = cr.limit || 0;
+  document.getElementById('credit-rate').value = cr.interest_rate;
+  document.getElementById('credit-due-day').value = cr.due_day;
+  
+  document.getElementById('modal-credit-title').textContent = 'Редактировать кредит/карту';
+  document.getElementById('btn-delete-credit').style.display = 'block';
+  document.getElementById('btn-submit-credit').textContent = 'Сохранить';
+  openModal('modal-credit');
+}
+
+function openPayCredit(id) {
+  document.getElementById('form-pay-credit').reset();
+  document.getElementById('pay-credit-id').value = id;
+  openModal('modal-pay-credit');
+}
+
 async function deleteFromModal(type) {
   let id;
   if (type === 'income') id = document.getElementById('income-id').value;
   if (type === 'expense') id = document.getElementById('expense-id').value;
   if (type === 'obligation') id = document.getElementById('obl-id').value;
   if (type === 'planned') id = document.getElementById('planned-id').value;
+  if (type === 'credit') id = document.getElementById('credit-id').value;
   
   if (!id) return;
   if (confirm('Удалить эту запись?')) {
@@ -579,6 +655,10 @@ async function deleteFromModal(type) {
       await deleteObligation(id);
     } else if (type === 'planned') {
       await deletePlanned(id);
+    } else if (type === 'credit') {
+      await DB.Credits.remove(id);
+      await renderAll();
+      showToast('Кредит удален');
     }
     closeModal('modal-' + type);
   }

@@ -35,7 +35,7 @@
         <div class="header-logo">
           <span class="logo-icon">💎</span>
           <span class="logo-text">ФинПлан</span>
-          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v20</span>
+          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v22</span>
         </div>
         <div class="header-date">
           <span id="header-date-text"></span>
@@ -163,8 +163,20 @@
         <div class="tab-content-inner">
           <div class="tab-header">
             <h1 class="tab-title">Обязательства</h1>
-            <button class="icon-btn" id="btn-add-obligation" onclick="openAddObligation()" title="Добавить обязательство">+</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="icon-btn" id="btn-add-credit" onclick="openAddCredit()" title="Добавить кредит" style="background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); font-size: 14px; padding: 0 12px; width: auto; border-radius: 8px;">💳 Кредит</button>
+              <button class="icon-btn" id="btn-add-obligation" onclick="openAddObligation()" title="Добавить обязательство">+</button>
+            </div>
           </div>
+          
+          <h2 class="section-title" style="margin-bottom: 12px; margin-top: 8px;">💳 Кредиты и карты</h2>
+          <div id="credits-list" class="obligations-list" style="margin-bottom: 24px;">
+            <div class="empty-state">
+              <p>Нет активных кредитов</p>
+            </div>
+          </div>
+
+          <h2 class="section-title" style="margin-bottom: 12px;">🔥 Регулярные платежи и долги</h2>
           <div id="obligations-list" class="obligations-list">
             <div class="empty-state">
               <div class="empty-icon">🔥</div>
@@ -289,7 +301,7 @@
         <span class="nav-icon">⏳</span>
         <span class="nav-label">Ожидания</span>
       </button>
-      <button class="nav-item" id="nav-analytics" role="tab" aria-selected="false" aria-controls="tab-analytics" onclick="switchTab('analytics', this)">
+      <button class="nav-item" id="nav-analytics" role="tab" aria-selected="false" aria-controls="tab-analytics" onclick="switchTab('analytics', this)" style="display: none;">
         <span class="nav-icon">📈</span>
         <span class="nav-label">Аналитика</span>
       </button>
@@ -379,12 +391,83 @@
             <option value="Низкая">🟢 Низкая</option>
           </select>
         </div>
+        <div class="form-group" style="flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px;">
+          <input type="checkbox" id="obl-is-recurring" checked style="width: 20px; height: 20px; accent-color: var(--md-sys-color-primary);" />
+          <label class="form-label" for="obl-is-recurring" style="margin-bottom: 0;">Повторять каждый месяц</label>
+        </div>
         <div class="form-actions" style="justify-content: space-between;">
           <button type="button" class="btn btn-secondary" id="btn-delete-obligation" onclick="deleteFromModal('obligation')" style="display:none; color: var(--md-sys-color-error); background: transparent; padding: 0 12px;">Удалить</button>
           <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end;">
             <button type="button" class="btn btn-secondary" onclick="closeModal('modal-obligation')">Отмена</button>
             <button type="submit" class="btn btn-primary" id="btn-submit-obligation">Добавить</button>
           </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Credit -->
+  <div class="modal-overlay" id="modal-credit" role="dialog" aria-modal="true" aria-labelledby="modal-credit-title" onclick="closeModalOnOverlay(event, 'modal-credit')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-credit-title">Добавить кредит/карту</h2>
+      <form id="form-credit" onsubmit="submitCredit(event)">
+        <input type="hidden" id="credit-id" value="" />
+        <div class="form-group">
+          <label class="form-label" for="credit-title">Название</label>
+          <input type="text" id="credit-title" class="form-input" placeholder="Например: Кредитка Сбер..." required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="credit-type">Тип</label>
+          <select id="credit-type" class="form-select" required>
+            <option value="credit">Кредит (заем)</option>
+            <option value="card">Кредитная карта</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="credit-debt">Текущий долг (₽)</label>
+          <input type="text" inputmode="decimal" id="credit-debt" class="form-input" placeholder="0" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="credit-limit">Лимит карты / Изначальная сумма (₽)</label>
+          <input type="text" inputmode="decimal" id="credit-limit" class="form-input" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="credit-rate">Процентная ставка (% годовых)</label>
+          <input type="text" inputmode="decimal" id="credit-rate" class="form-input" placeholder="20" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="credit-due-day">День выписки/платежа (1-31)</label>
+          <input type="number" id="credit-due-day" class="form-input" placeholder="25" min="1" max="31" required />
+        </div>
+        <div class="form-actions" style="justify-content: space-between;">
+          <button type="button" class="btn btn-secondary" id="btn-delete-credit" onclick="deleteFromModal('credit')" style="display:none; color: var(--md-sys-color-error); background: transparent; padding: 0 12px;">Удалить</button>
+          <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-credit')">Отмена</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-credit">Сохранить</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Pay Credit -->
+  <div class="modal-overlay" id="modal-pay-credit" role="dialog" aria-modal="true" aria-labelledby="modal-pay-credit-title" onclick="closeModalOnOverlay(event, 'modal-pay-credit')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-pay-credit-title">Внести платеж по кредиту</h2>
+      <form id="form-pay-credit" onsubmit="submitPayCredit(event)">
+        <input type="hidden" id="pay-credit-id" value="" />
+        <div class="form-group">
+          <label class="form-label" for="pay-credit-amount">Сумма платежа (₽)</label>
+          <input type="text" inputmode="decimal" id="pay-credit-amount" class="form-input" placeholder="0" required />
+        </div>
+        <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+          Эта сумма будет добавлена в Расходы, а текущий долг по кредиту уменьшится.
+        </p>
+        <div class="form-actions" style="justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-pay-credit')">Отмена</button>
+          <button type="submit" class="btn btn-primary">Оплатить</button>
         </div>
       </form>
     </div>
@@ -467,10 +550,10 @@
 
   <!-- Scripts -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="js/db.js?v=21"></script>
-  <script src="js/calculator.js?v=21"></script>
-  <script src="js/ui.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="js/db.js?v=22"></script>
+  <script src="js/calculator.js?v=22"></script>
+  <script src="js/ui.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
 
 </body>
 </html>

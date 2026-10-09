@@ -30,7 +30,19 @@ async function checkMonthReset() {
 
   if (last && last !== ym) {
     await DB.Obligations.resetPaidForNewMonth();
-    showToast('🔄 Новый месяц! Статус оплаты сброшен.');
+    
+    // Начисляем проценты по кредитам
+    const credits = await DB.Credits.getAll();
+    for (const credit of credits) {
+      if (credit.current_debt > 0 && credit.interest_rate > 0) {
+        const monthlyRate = credit.interest_rate / 12 / 100;
+        const interest = credit.current_debt * monthlyRate;
+        const newDebt = credit.current_debt + interest;
+        await DB.Credits.update(credit.id, { current_debt: newDebt });
+      }
+    }
+
+    showToast('🔄 Новый месяц! Сброшены статусы, начислены % по кредитам.');
   }
 
   await DB.Settings.setLastMonth(ym);
@@ -179,6 +191,7 @@ async function submitObligation(e) {
   const amount      = parseFloat(amountStr);
   const due_day     = parseInt(document.getElementById('obl-due-day').value);
   const criticality = document.getElementById('obl-criticality').value;
+  const is_recurring = document.getElementById('obl-is-recurring').checked;
 
   if (!title || !amount || !due_day || !criticality) {
     showToast('⚠️ Заполните все поля');
@@ -186,15 +199,83 @@ async function submitObligation(e) {
   }
 
   if (id) {
-    await DB.Obligations.update(id, { title, amount, due_day, criticality });
+    await DB.Obligations.update(id, { title, amount, due_day, criticality, is_recurring });
     showToast(`🔥 Обязательство «${title}» обновлено`);
   } else {
-    await DB.Obligations.add({ title, amount, due_day, criticality });
+    await DB.Obligations.add({ title, amount, due_day, criticality, is_recurring });
     showToast(`🔥 Обязательство «${title}» добавлено`);
   }
 
   document.getElementById('form-obligation').reset();
   closeModal('modal-obligation');
+  await renderAll();
+  TG?.HapticFeedback?.notificationOccurred('success');
+}
+
+}
+
+// ============================================================
+// FORM: КРЕДИТЫ И КАРТЫ
+// ============================================================
+async function submitCredit(e) {
+  e.preventDefault();
+  const id          = document.getElementById('credit-id')?.value;
+  const title       = document.getElementById('credit-title').value;
+  const type        = document.getElementById('credit-type').value;
+  const debtStr     = document.getElementById('credit-debt').value.replace(/\\s/g, '').replace(',', '.');
+  const current_debt = parseFloat(debtStr);
+  const limitStr    = document.getElementById('credit-limit').value.replace(/\\s/g, '').replace(',', '.');
+  const limit       = parseFloat(limitStr) || 0;
+  const rateStr     = document.getElementById('credit-rate').value.replace(/\\s/g, '').replace(',', '.');
+  const interest_rate = parseFloat(rateStr) || 0;
+  const due_day     = parseInt(document.getElementById('credit-due-day').value);
+
+  if (!title || current_debt === undefined || !due_day) {
+    showToast('⚠️ Заполните основные поля');
+    return;
+  }
+
+  if (id) {
+    await DB.Credits.update(id, { title, type, current_debt, limit, interest_rate, due_day });
+    showToast(`💳 Кредит «${title}» обновлен`);
+  } else {
+    await DB.Credits.add({ title, type, current_debt, limit, interest_rate, due_day });
+    showToast(`💳 Кредит «${title}» добавлен`);
+  }
+
+  document.getElementById('form-credit').reset();
+  closeModal('modal-credit');
+  await renderAll();
+  TG?.HapticFeedback?.notificationOccurred('success');
+}
+
+async function submitPayCredit(e) {
+  e.preventDefault();
+  const id        = document.getElementById('pay-credit-id').value;
+  const amountStr = document.getElementById('pay-credit-amount').value.replace(/\\s/g, '').replace(',', '.');
+  const amount    = parseFloat(amountStr);
+
+  if (!amount || amount <= 0) {
+    showToast('⚠️ Введите сумму платежа');
+    return;
+  }
+
+  const credits = await DB.Credits.getAll();
+  const credit = credits.find(x => x.id === id);
+  if (!credit) return;
+
+  // Уменьшаем долг
+  let newDebt = credit.current_debt - amount;
+  if (newDebt < 0) newDebt = 0;
+  await DB.Credits.update(id, { current_debt: newDebt });
+
+  // Добавляем как расход
+  await DB.Expenses.add({ amount, description: `Платеж по кредиту: ${credit.title}` });
+
+  showToast(`✅ Платеж ${fmt(amount)} внесен!`);
+  
+  document.getElementById('form-pay-credit').reset();
+  closeModal('modal-pay-credit');
   await renderAll();
   TG?.HapticFeedback?.notificationOccurred('success');
 }
