@@ -92,28 +92,23 @@ async function submitExpense(e) {
 // QR SCANNER (ЧЕКИ)
 // ============================================================
 function scanReceipt() {
-  alert('Кнопка нажата! TG: ' + (typeof TG) + ', showScanQrPopup: ' + (TG && typeof TG.showScanQrPopup));
   if (!TG || !TG.showScanQrPopup) {
-    showToast('⚠️ Сканер QR-кодов доступен только внутри Telegram');
+    showToast('⚠️ Сканер QR-кодов недоступен');
     return;
   }
 
-  try {
-    TG.showScanQrPopup({
-      text: "Наведите камеру на QR-код чека"
-    }, function(qrText) {
-      alert('QR считан: ' + qrText);
+  // Очищенный вызов, без alert, которые могут сбрасывать контекст клика
+  TG.showScanQrPopup({ text: "Скан чека" }, function(qrText) {
+    if (qrText) {
+      // Закрываем сканер, если считалось
       TG.closeScanQrPopup();
       processReceipt(qrText);
-    });
-  } catch (e) {
-    alert('Ошибка при вызове сканера: ' + e.message);
-  }
+    }
+  });
 }
 
 function processReceipt(qrText) {
   try {
-    // Пример строки чека: t=20230521T1530&s=1250.50&fn=928...&i=123...&fp=345...&n=1
     const params = new URLSearchParams(qrText);
     const sumParam = params.get('s');
     
