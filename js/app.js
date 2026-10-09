@@ -259,8 +259,6 @@ async function submitPayCredit(e) {
   const id        = document.getElementById('pay-credit-id').value;
   const amountStr = document.getElementById('pay-credit-amount').value.replace(/\\s/g, '').replace(',', '.');
   const amount    = parseFloat(amountStr);
-  const interestStr = document.getElementById('pay-credit-interest').value.replace(/\\s/g, '').replace(',', '.');
-  const interest = parseFloat(interestStr) || 0;
 
   if (!amount || amount <= 0) {
     showToast('⚠️ Введите сумму платежа');
@@ -271,6 +269,13 @@ async function submitPayCredit(e) {
   const credit = credits.find(x => x.id === id);
   if (!credit) return;
 
+  // Рассчитываем проценты автоматически на основе годовой ставки
+  let interest = 0;
+  if (credit.current_debt > 0 && credit.interest_rate > 0) {
+    const monthlyRate = credit.interest_rate / 12 / 100;
+    interest = credit.current_debt * monthlyRate;
+  }
+  
   // Рассчитываем, сколько пошло на погашение основного долга
   const principalReduction = amount - interest;
 

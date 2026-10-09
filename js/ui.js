@@ -655,18 +655,8 @@ async function openPayCredit(id) {
   // Автоматически подставляем минимальный платеж, если он есть
   const credits = await DB.Credits.getAll();
   const cr = credits.find(o => o.id === id);
-  if (cr) {
-    if (cr.min_payment) {
-      document.getElementById('pay-credit-amount').value = cr.min_payment;
-    }
-    // Рассчитываем примерные проценты на основе ставки и подставляем
-    if (cr.current_debt > 0 && cr.interest_rate > 0) {
-      const monthlyRate = cr.interest_rate / 12 / 100;
-      const approxInterest = Math.round(cr.current_debt * monthlyRate);
-      document.getElementById('pay-credit-interest').value = approxInterest;
-    } else {
-      document.getElementById('pay-credit-interest').value = '';
-    }
+  if (cr && cr.min_payment) {
+    document.getElementById('pay-credit-amount').value = cr.min_payment;
   }
   
   openModal('modal-pay-credit');
