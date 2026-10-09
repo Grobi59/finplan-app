@@ -35,7 +35,7 @@
         <div class="header-logo">
           <span class="logo-icon">💎</span>
           <span class="logo-text">ФинПлан</span>
-          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v25</span>
+          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v26</span>
         </div>
         <div class="header-date">
           <span id="header-date-text"></span>
@@ -463,11 +463,15 @@
       <form id="form-pay-credit" onsubmit="submitPayCredit(event)">
         <input type="hidden" id="pay-credit-id" value="" />
         <div class="form-group">
-          <label class="form-label" for="pay-credit-amount">Сумма платежа (₽)</label>
+          <label class="form-label" for="pay-credit-amount">Общая сумма платежа (₽)</label>
           <input type="text" inputmode="decimal" id="pay-credit-amount" class="form-input" placeholder="0" required />
         </div>
+        <div class="form-group" id="pay-credit-interest-group">
+          <label class="form-label" for="pay-credit-interest">Из них проценты банку (₽)</label>
+          <input type="text" inputmode="decimal" id="pay-credit-interest" class="form-input" placeholder="0 (можно оставить пустым)" />
+        </div>
         <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
-          Эта сумма будет добавлена в Расходы, а текущий долг по кредиту уменьшится.
+          Общая сумма уйдет в Расходы. А долг уменьшится на разницу (Платеж минус Проценты).
         </p>
         <div class="form-actions" style="justify-content: flex-end;">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-pay-credit')">Отмена</button>
@@ -580,10 +584,10 @@
 
   <!-- Scripts -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="js/db.js?v=25"></script>
-  <script src="js/calculator.js?v=25"></script>
-  <script src="js/ui.js?v=25"></script>
-  <script src="js/app.js?v=25"></script>
+  <script src="js/db.js?v=26"></script>
+  <script src="js/calculator.js?v=26"></script>
+  <script src="js/ui.js?v=26"></script>
+  <script src="js/app.js?v=26"></script>
 
 </body>
 </html>

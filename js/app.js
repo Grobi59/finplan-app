@@ -31,15 +31,19 @@ async function checkMonthReset() {
   if (last && last !== ym) {
     await DB.Obligations.resetPaidForNewMonth();
     
-    // Начисляем проценты по кредитам и сбрасываем статус оплаты
+    // Начисляем проценты по кредитным картам и сбрасываем статус оплаты для всех
     const credits = await DB.Credits.getAll();
     for (const credit of credits) {
       let newDebt = credit.current_debt;
-      if (credit.current_debt > 0 && credit.interest_rate > 0) {
+      
+      // Автоматическое начисление процентов оставляем только для кредиток
+      // (для обычных кредитов проценты теперь вводятся вручную при оплате)
+      if (credit.type === 'card' && credit.current_debt > 0 && credit.interest_rate > 0) {
         const monthlyRate = credit.interest_rate / 12 / 100;
         const interest = credit.current_debt * monthlyRate;
         newDebt += interest;
       }
+      
       await DB.Credits.update(credit.id, { current_debt: newDebt, is_paid: false });
     }
 
@@ -255,6 +259,8 @@ async function submitPayCredit(e) {
   const id        = document.getElementById('pay-credit-id').value;
   const amountStr = document.getElementById('pay-credit-amount').value.replace(/\\s/g, '').replace(',', '.');
   const amount    = parseFloat(amountStr);
+  const interestStr = document.getElementById('pay-credit-interest').value.replace(/\\s/g, '').replace(',', '.');
+  const interest = parseFloat(interestStr) || 0;
 
   if (!amount || amount <= 0) {
     showToast('⚠️ Введите сумму платежа');
@@ -265,8 +271,11 @@ async function submitPayCredit(e) {
   const credit = credits.find(x => x.id === id);
   if (!credit) return;
 
-  // Уменьшаем долг
-  let newDebt = credit.current_debt - amount;
+  // Рассчитываем, сколько пошло на погашение основного долга
+  const principalReduction = amount - interest;
+
+  // Уменьшаем долг только на тело (основной долг)
+  let newDebt = credit.current_debt - principalReduction;
   if (newDebt < 0) newDebt = 0;
   await DB.Credits.update(id, { current_debt: newDebt, is_paid: true });
 
