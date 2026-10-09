@@ -185,6 +185,7 @@ const DB = (() => {
         min_payment: parseFloat(min_payment) || 0,
         interest_rate: parseFloat(interest_rate) || 0,
         due_day: parseInt(due_day) || 1,
+        is_paid: false,
         created_at: new Date().toISOString(),
       };
       items.push(item);

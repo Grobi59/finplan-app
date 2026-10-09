@@ -129,12 +129,22 @@ async function renderUpcoming() {
             <span class="upcoming-day">${dayLabel}</span>
           </div>
         </div>
-        <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); toggleUpcomingObligation('${obl.id}', '${escHtml(obl.title)}', ${obl.amount})" title="Отметить оплаченным" style="padding: 8px; font-size: 20px;">✅</button>
+        <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); toggleUpcomingObligation('${obl.id}', '${escHtml(obl.title)}', ${obl.amount}, ${obl.is_credit})" title="Отметить оплаченным" style="padding: 8px; font-size: 20px;">✅</button>
       </div>`;
   }).join('');
 }
 
-async function toggleUpcomingObligation(id, title, amount) {
+async function toggleUpcomingObligation(id, title, amount, is_credit = false) {
+  if (is_credit) {
+    const credits = await DB.Credits.getAll();
+    const cr = credits.find(x => x.id === id);
+    if (!cr) return;
+    
+    // Для кредита открываем окошко оплаты напрямую, так как там более сложная логика с уменьшением долга
+    openPayCredit(id);
+    return;
+  }
+
   await DB.Obligations.togglePaid(id);
   if (confirm(`Обязательство «${title}» оплачено.\n\nДобавить расход на сумму ${fmt(amount)} прямо сейчас, чтобы баланс сошелся?`)) {
     await DB.Expenses.add({ amount: amount, description: title });
@@ -333,7 +343,7 @@ async function renderCredits() {
                      `${cr.due_day}-го числа (через ${daysLeft} дн.)`;
                      
     return `
-      <div class="obligation-item medium" id="cr-${cr.id}" style="cursor:pointer;" onclick="editCredit('${cr.id}')">
+      <div class="obligation-item medium ${cr.is_paid ? 'paid' : ''}" id="cr-${cr.id}" style="cursor:pointer;" onclick="editCredit('${cr.id}')">
         <div class="obl-crit" style="background: var(--md-sys-color-secondary)"></div>
         <div class="obl-info">
           <div class="obl-title">${escHtml(cr.title)}</div>
@@ -341,8 +351,12 @@ async function renderCredits() {
         </div>
         <div class="obl-right">
           <div class="obl-amount" style="color: var(--md-sys-color-error)">−${fmt(cr.current_debt)}</div>
-          <div class="obl-actions">
-            <button class="obl-check-btn check-btn" onclick="event.stopPropagation(); openPayCredit('${cr.id}')" style="font-size: 14px; padding: 4px 12px; width: auto; border-radius: 8px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);">Оплатить</button>
+          <div class="obl-actions" style="gap: 4px;">
+            ${isCard ? `<button class="obl-check-btn check-btn" onclick="event.stopPropagation(); openSpendCredit('${cr.id}')" style="font-size: 14px; padding: 4px 8px; width: auto; border-radius: 8px; background: transparent; border: 1px solid var(--md-sys-color-error); color: var(--md-sys-color-error);">Потратить</button>` : ''}
+            ${cr.is_paid 
+              ? `<button class="obl-check-btn check-btn active" onclick="event.stopPropagation(); DB.Credits.update('${cr.id}', {is_paid: false}).then(()=>renderAll())" style="font-size: 14px; padding: 4px 8px; width: auto; border-radius: 8px;">✓ Оплачено</button>`
+              : `<button class="obl-check-btn check-btn" onclick="event.stopPropagation(); openPayCredit('${cr.id}')" style="font-size: 14px; padding: 4px 8px; width: auto; border-radius: 8px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);">Оплатить</button>`
+            }
           </div>
         </div>
       </div>`;
@@ -646,6 +660,12 @@ async function openPayCredit(id) {
   }
   
   openModal('modal-pay-credit');
+}
+
+function openSpendCredit(id) {
+  document.getElementById('form-spend-credit').reset();
+  document.getElementById('spend-credit-id').value = id;
+  openModal('modal-spend-credit');
 }
 
 async function deleteFromModal(type) {

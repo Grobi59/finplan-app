@@ -31,15 +31,16 @@ async function checkMonthReset() {
   if (last && last !== ym) {
     await DB.Obligations.resetPaidForNewMonth();
     
-    // Начисляем проценты по кредитам
+    // Начисляем проценты по кредитам и сбрасываем статус оплаты
     const credits = await DB.Credits.getAll();
     for (const credit of credits) {
+      let newDebt = credit.current_debt;
       if (credit.current_debt > 0 && credit.interest_rate > 0) {
         const monthlyRate = credit.interest_rate / 12 / 100;
         const interest = credit.current_debt * monthlyRate;
-        const newDebt = credit.current_debt + interest;
-        await DB.Credits.update(credit.id, { current_debt: newDebt });
+        newDebt += interest;
       }
+      await DB.Credits.update(credit.id, { current_debt: newDebt, is_paid: false });
     }
 
     showToast('🔄 Новый месяц! Сброшены статусы, начислены % по кредитам.');
@@ -267,7 +268,7 @@ async function submitPayCredit(e) {
   // Уменьшаем долг
   let newDebt = credit.current_debt - amount;
   if (newDebt < 0) newDebt = 0;
-  await DB.Credits.update(id, { current_debt: newDebt });
+  await DB.Credits.update(id, { current_debt: newDebt, is_paid: true });
 
   // Добавляем как расход
   await DB.Expenses.add({ amount, description: `Платеж по кредиту: ${credit.title}` });
@@ -276,6 +277,40 @@ async function submitPayCredit(e) {
   
   document.getElementById('form-pay-credit').reset();
   closeModal('modal-pay-credit');
+  await renderAll();
+  TG?.HapticFeedback?.notificationOccurred('success');
+}
+
+async function submitSpendCredit(e) {
+  e.preventDefault();
+  const id        = document.getElementById('spend-credit-id').value;
+  const amountStr = document.getElementById('spend-credit-amount').value.replace(/\\s/g, '').replace(',', '.');
+  const amount    = parseFloat(amountStr);
+  const desc      = document.getElementById('spend-credit-desc').value.trim() || 'Покупка';
+
+  if (!amount || amount <= 0) {
+    showToast('⚠️ Введите сумму покупки');
+    return;
+  }
+
+  const credits = await DB.Credits.getAll();
+  const credit = credits.find(x => x.id === id);
+  if (!credit) return;
+
+  // 1. Увеличиваем долг
+  const newDebt = credit.current_debt + amount;
+  await DB.Credits.update(id, { current_debt: newDebt });
+
+  // 2. Добавляем фиктивный доход (чтобы наличные не уменьшились)
+  await DB.Incomes.add({ amount, source: `Кредитные средства (${credit.title})` });
+
+  // 3. Добавляем реальный расход (чтобы он был в аналитике)
+  await DB.Expenses.add({ amount, description: `💳 С кредитки: ${desc}` });
+
+  showToast(`✅ Потрачено ${fmt(amount)} с карты!`);
+  
+  document.getElementById('form-spend-credit').reset();
+  closeModal('modal-spend-credit');
   await renderAll();
   TG?.HapticFeedback?.notificationOccurred('success');
 }

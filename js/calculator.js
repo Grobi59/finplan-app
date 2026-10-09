@@ -22,10 +22,11 @@ const Calculator = (() => {
    * Возвращает Promise<BalanceObject>
    */
   async function compute() {
-    const [incomes, expenses, obligations] = await Promise.all([
+    const [incomes, expenses, obligations, credits] = await Promise.all([
       DB.Incomes.getAll(),
       DB.Expenses.getAll(),
       DB.Obligations.getAll(),
+      DB.Credits.getAll(),
     ]);
 
     // 1. Текущий кэш
@@ -34,13 +35,18 @@ const Calculator = (() => {
     const current_cash = totalIncome - totalExpense;
 
     // 2. Замороженные средства (Высокая + Средняя, не оплачено, в ближ. FREEZE_WINDOW дней)
-    const frozen_funds = obligations
+    let frozen_funds = obligations
       .filter(obl =>
         !obl.is_paid &&
         (obl.criticality === 'Высокая' || obl.criticality === 'Средняя') &&
         daysUntilDueDay(obl.due_day) <= FREEZE_WINDOW
       )
       .reduce((s, obl) => s + obl.amount, 0);
+      
+    // + Добавляем неоплаченные платежи по кредитам (считаем их Высокой важности)
+    frozen_funds += credits
+      .filter(cr => !cr.is_paid && cr.min_payment > 0 && daysUntilDueDay(cr.due_day) <= FREEZE_WINDOW)
+      .reduce((s, cr) => s + cr.min_payment, 0);
 
     // 3. Свободный баланс
     const free_balance = current_cash - frozen_funds;
@@ -109,11 +115,28 @@ const Calculator = (() => {
    * Возвращает Promise<Array>
    */
   async function getUpcomingObligations(days = 7) {
-    const obligations = await DB.Obligations.getAll();
-    return obligations
+    const [obligations, credits] = await Promise.all([
+      DB.Obligations.getAll(),
+      DB.Credits.getAll()
+    ]);
+    
+    const upcomingObl = obligations
       .filter(obl => !obl.is_paid && daysUntilDueDay(obl.due_day) <= days)
-      .map(obl => ({ ...obl, days_left: daysUntilDueDay(obl.due_day) }))
-      .sort((a, b) => a.days_left - b.days_left);
+      .map(obl => ({ ...obl, days_left: daysUntilDueDay(obl.due_day), is_credit: false }));
+      
+    const upcomingCredits = credits
+      .filter(cr => !cr.is_paid && cr.min_payment > 0 && daysUntilDueDay(cr.due_day) <= days)
+      .map(cr => ({ 
+        id: cr.id, 
+        title: (cr.type === 'card' ? '💳 ' : '🏦 ') + cr.title, 
+        amount: cr.min_payment, 
+        due_day: cr.due_day, 
+        criticality: 'Высокая',
+        days_left: daysUntilDueDay(cr.due_day),
+        is_credit: true 
+      }));
+
+    return [...upcomingObl, ...upcomingCredits].sort((a, b) => a.days_left - b.days_left);
   }
 
   /**

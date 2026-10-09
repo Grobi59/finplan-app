@@ -35,7 +35,7 @@
         <div class="header-logo">
           <span class="logo-icon">💎</span>
           <span class="logo-text">ФинПлан</span>
-          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v24</span>
+          <span class="app-version" style="font-size: 10px; color: var(--md-sys-color-on-surface-variant); margin-left: 8px;">v25</span>
         </div>
         <div class="header-date">
           <span id="header-date-text"></span>
@@ -477,6 +477,32 @@
     </div>
   </div>
 
+  <!-- Modal: Spend Credit -->
+  <div class="modal-overlay" id="modal-spend-credit" role="dialog" aria-modal="true" aria-labelledby="modal-spend-credit-title" onclick="closeModalOnOverlay(event, 'modal-spend-credit')">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title" id="modal-spend-credit-title">Потратить с кредитки</h2>
+      <form id="form-spend-credit" onsubmit="submitSpendCredit(event)">
+        <input type="hidden" id="spend-credit-id" value="" />
+        <div class="form-group">
+          <label class="form-label" for="spend-credit-amount">Сумма покупки (₽)</label>
+          <input type="text" inputmode="decimal" id="spend-credit-amount" class="form-input" placeholder="0" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="spend-credit-desc">Описание покупки</label>
+          <input type="text" id="spend-credit-desc" class="form-input" placeholder="Продукты, Кафе..." required />
+        </div>
+        <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-top: 8px;">
+          Долг по кредитке увеличится. Сумма запишется в общие Расходы, но не уменьшит ваши Наличные.
+        </p>
+        <div class="form-actions" style="justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-spend-credit')">Отмена</button>
+          <button type="submit" class="btn btn-primary" style="background: var(--md-sys-color-error); color: var(--md-sys-color-on-error);">Потратить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal: Add Planned Income -->
   <div class="modal-overlay" id="modal-planned" role="dialog" aria-modal="true" aria-labelledby="modal-planned-title" onclick="closeModalOnOverlay(event, 'modal-planned')">
     <div class="modal-sheet">
@@ -554,10 +580,10 @@
 
   <!-- Scripts -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="js/db.js?v=24"></script>
-  <script src="js/calculator.js?v=24"></script>
-  <script src="js/ui.js?v=24"></script>
-  <script src="js/app.js?v=24"></script>
+  <script src="js/db.js?v=25"></script>
+  <script src="js/calculator.js?v=25"></script>
+  <script src="js/ui.js?v=25"></script>
+  <script src="js/app.js?v=25"></script>
 
 </body>
 </html>
