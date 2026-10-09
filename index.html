@@ -450,14 +450,27 @@
     </div>
   </div>
 
+  <!-- Modal: Scanner -->
+  <div class="modal-overlay" id="modal-scanner" role="dialog" aria-modal="true" onclick="closeScannerModal(event)">
+    <div class="modal-sheet" style="display: flex; flex-direction: column;">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title">Наведите на QR-код чека</h2>
+      <div id="qr-reader" style="width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 16px;"></div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="closeScannerModal(event)">Отмена</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/db.js?v=20"></script>
-  <script src="js/calculator.js?v=20"></script>
-  <script src="js/ui.js?v=20"></script>
-  <script src="js/app.js?v=20"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="js/db.js?v=21"></script>
+  <script src="js/calculator.js?v=21"></script>
+  <script src="js/ui.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
 
 </body>
 </html>

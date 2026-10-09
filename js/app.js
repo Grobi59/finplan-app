@@ -91,20 +91,45 @@ async function submitExpense(e) {
 // ============================================================
 // QR SCANNER (ЧЕКИ)
 // ============================================================
+let html5QrCode = null;
+
 function scanReceipt() {
-  if (!TG || !TG.showScanQrPopup) {
-    showToast('⚠️ Сканер QR-кодов недоступен');
-    return;
+  openModal('modal-scanner');
+  
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("qr-reader");
   }
 
-  // Очищенный вызов, без alert, которые могут сбрасывать контекст клика
-  TG.showScanQrPopup({ text: "Скан чека" }, function(qrText) {
-    if (qrText) {
-      // Закрываем сканер, если считалось
-      TG.closeScanQrPopup();
-      processReceipt(qrText);
+  html5QrCode.start(
+    { facingMode: "environment" }, // используем заднюю камеру
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    (decodedText) => {
+      // Успешно считано
+      closeScannerModal();
+      processReceipt(decodedText);
+    },
+    (errorMessage) => {
+      // Игнорируем ошибки при поиске QR-кода в кадре
     }
+  ).catch((err) => {
+    closeScannerModal();
+    showToast('⚠️ Ошибка камеры: нет доступа или устройства');
   });
+}
+
+function closeScannerModal(e) {
+  if (e && e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+    // клик по фону
+  } else if (e && e.target) {
+    // клик по кнопке
+  } else if (e) {
+    return;
+  }
+  
+  closeModal('modal-scanner');
+  if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().catch(err => console.error(err));
+  }
 }
 
 function processReceipt(qrText) {
