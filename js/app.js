@@ -92,18 +92,23 @@ async function submitExpense(e) {
 // QR SCANNER (ЧЕКИ)
 // ============================================================
 function scanReceipt() {
+  alert('Кнопка нажата! TG: ' + (typeof TG) + ', showScanQrPopup: ' + (TG && typeof TG.showScanQrPopup));
   if (!TG || !TG.showScanQrPopup) {
     showToast('⚠️ Сканер QR-кодов доступен только внутри Telegram');
     return;
   }
 
-  TG.showScanQrPopup({
-    text: "Наведите камеру на QR-код чека"
-  }, function(qrText) {
-    // Закрываем сканер сразу после считывания
-    TG.closeScanQrPopup();
-    processReceipt(qrText);
-  });
+  try {
+    TG.showScanQrPopup({
+      text: "Наведите камеру на QR-код чека"
+    }, function(qrText) {
+      alert('QR считан: ' + qrText);
+      TG.closeScanQrPopup();
+      processReceipt(qrText);
+    });
+  } catch (e) {
+    alert('Ошибка при вызове сканера: ' + e.message);
+  }
 }
 
 function processReceipt(qrText) {
