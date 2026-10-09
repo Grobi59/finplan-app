@@ -212,8 +212,6 @@ async function submitObligation(e) {
   TG?.HapticFeedback?.notificationOccurred('success');
 }
 
-}
-
 // ============================================================
 // FORM: КРЕДИТЫ И КАРТЫ
 // ============================================================
