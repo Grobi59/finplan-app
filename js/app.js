@@ -89,6 +89,61 @@ async function submitExpense(e) {
 }
 
 // ============================================================
+// QR SCANNER (ЧЕКИ)
+// ============================================================
+function scanReceipt() {
+  if (!TG || !TG.showScanQrPopup) {
+    showToast('⚠️ Сканер QR-кодов доступен только внутри Telegram');
+    return;
+  }
+
+  TG.showScanQrPopup({
+    text: "Наведите камеру на QR-код чека"
+  }, function(qrText) {
+    // Закрываем сканер сразу после считывания
+    TG.closeScanQrPopup();
+    processReceipt(qrText);
+  });
+}
+
+function processReceipt(qrText) {
+  try {
+    // Пример строки чека: t=20230521T1530&s=1250.50&fn=928...&i=123...&fp=345...&n=1
+    const params = new URLSearchParams(qrText);
+    const sumParam = params.get('s');
+    
+    if (sumParam) {
+      const amount = parseFloat(sumParam);
+      
+      if (amount > 0) {
+        // Открываем модалку добавления расхода (предполагается что openAddExpense глобальна)
+        if (typeof openAddExpense === 'function') {
+          openAddExpense();
+          // Автозаполнение суммы
+          setTimeout(() => {
+            const input = document.getElementById('expense-amount');
+            if (input) input.value = amount;
+            // Фокус на поле описания
+            const desc = document.getElementById('expense-desc');
+            if (desc) desc.focus();
+          }, 100);
+        }
+        
+        showToast('✅ Сумма чека распознана!');
+        TG?.HapticFeedback?.notificationOccurred('success');
+      } else {
+        showToast('⚠️ Не удалось определить сумму');
+      }
+    } else {
+      showToast('⚠️ Это не похоже на фискальный чек');
+    }
+  } catch (e) {
+    console.error('Ошибка парсинга QR чека:', e);
+    showToast('⚠️ Ошибка при чтении QR-кода');
+  }
+}
+
+// ============================================================
 // FORM: ОБЯЗАТЕЛЬСТВО
 // ============================================================
 async function submitObligation(e) {
